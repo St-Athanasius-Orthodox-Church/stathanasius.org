@@ -4,6 +4,16 @@
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
 
+@utility prose {
+  --tw-prose-body: var(--foreground);
+  --tw-prose-headings: var(--foreground);
+
+  h1 {
+    font-weight: normal;
+    margin-bottom: 0.25em;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
