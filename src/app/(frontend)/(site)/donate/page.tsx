@@ -19,7 +19,7 @@ export default async function DonatePage({ searchParams }: DonatePageProps) {
 
   return (
     <>
-      <Hero size="fullPage" gradientIntensity="dark">
+      <Hero size="fullPage" gradientIntensity="strong">
         <DonationForm
           isSuccess={isSuccess}
           initialEarmark={params.earmark}

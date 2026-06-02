@@ -15,7 +15,8 @@ const gradientStyles = {
     "linear-gradient(to bottom, rgba(30, 58, 95, 0.5), rgba(30, 58, 95, 0.7))",
   normal:
     "linear-gradient(to bottom, rgba(30, 58, 95, 0.6), rgba(30, 58, 95, 0.8))",
-  dark: "linear-gradient(to bottom, rgba(30, 58, 95, 0.7), rgba(30, 58, 95, 0.85))",
+  strong:
+    "linear-gradient(to bottom, rgba(30, 58, 95, 0.7), rgba(30, 58, 95, 0.85))",
 }
 
 const titleSizeClasses = {
@@ -42,7 +43,7 @@ type HeroProps = {
   /** Custom content (for custom content mode, e.g. forms) */
   children?: React.ReactNode
   /** Gradient overlay intensity */
-  gradientIntensity?: "light" | "normal" | "dark"
+  gradientIntensity?: "light" | "normal" | "strong"
   /** Background image URL */
   backgroundImage?: string
   /** Whether to show the gold separator at the bottom */

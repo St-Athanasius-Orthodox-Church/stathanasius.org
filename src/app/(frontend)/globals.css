@@ -14,10 +14,8 @@
   }
 }
 
-@custom-variant dark (&:is(.dark *));
-
 :root {
-  /* Byzantine Gold Light Theme - Traditional Orthodox */
+  /* Byzantine Gold Theme - Traditional Orthodox */
   --background: oklch(0.97 0.01 85);
   --foreground: oklch(0.18 0.02 60);
   --card: oklch(0.96 0.012 85);
@@ -71,42 +69,6 @@
   --warm-ivory: #f8f5f0;
   --soft-cream: #fdf8f3;
   --parchment: #f3ede4;
-}
-
-.dark {
-  /* Byzantine Gold Dark Theme - Church Interior */
-  --background: oklch(0.18 0.02 60);
-  --foreground: oklch(0.95 0.01 85);
-  --card: oklch(0.22 0.025 60);
-  --card-foreground: oklch(0.95 0.01 85);
-  --popover: oklch(0.2 0.02 60);
-  --popover-foreground: oklch(0.95 0.01 85);
-  --primary: oklch(0.78 0.16 85);
-  --primary-foreground: oklch(0.15 0.03 60);
-  --secondary: oklch(0.28 0.03 60);
-  --secondary-foreground: oklch(0.92 0.01 85);
-  --muted: oklch(0.28 0.03 60);
-  --muted-foreground: oklch(0.65 0.02 75);
-  --accent: oklch(0.4 0.14 25);
-  --accent-foreground: oklch(0.95 0.01 85);
-  --destructive: oklch(0.45 0.16 25);
-  --destructive-foreground: oklch(0.95 0.01 85);
-  --border: oklch(0.32 0.03 65);
-  --input: oklch(0.28 0.025 60);
-  --ring: oklch(0.78 0.16 85);
-  --chart-1: oklch(0.78 0.16 85);
-  --chart-2: oklch(0.5 0.16 25);
-  --chart-3: oklch(0.55 0.14 250);
-  --chart-4: oklch(0.55 0.14 145);
-  --chart-5: oklch(0.65 0.14 55);
-  --sidebar: oklch(0.16 0.018 60);
-  --sidebar-foreground: oklch(0.95 0.01 85);
-  --sidebar-primary: oklch(0.78 0.16 85);
-  --sidebar-primary-foreground: oklch(0.15 0.03 60);
-  --sidebar-accent: oklch(0.4 0.14 25);
-  --sidebar-accent-foreground: oklch(0.95 0.01 85);
-  --sidebar-border: oklch(0.32 0.03 65);
-  --sidebar-ring: oklch(0.78 0.16 85);
 }
 
 @theme inline {
