@@ -87,7 +87,7 @@ function Hero({
 
       {/* Content */}
       {hasStructuredContent ? (
-        <div className="animate-fade-in-up z-10 container mx-auto flex flex-col px-4 text-center">
+        <div className="z-10 container mx-auto flex flex-col px-4 text-center">
           {title && (
             <h1
               className={cn(
@@ -115,7 +115,7 @@ function Hero({
           )}
         </div>
       ) : children ? (
-        <div className="animate-fade-in-up z-10 w-full max-w-md px-4">
+        <div className="z-10 w-full max-w-md px-4">
           {children}
         </div>
       ) : null}

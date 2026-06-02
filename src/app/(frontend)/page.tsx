@@ -69,7 +69,7 @@ export default function Welcome() {
             <Card
               variant="orthodox"
               goldBorderTop
-              className="animate-fade-in-up animation-delay-100 rounded-lg sm:flex-1 sm:basis-[calc(50%-0.5rem)]"
+              className="rounded-lg sm:flex-1 sm:basis-[calc(50%-0.5rem)]"
             >
               <CardContent className="p-6 py-0">
                 <h3 className="mb-4 text-center font-cinzel text-xl font-semibold text-byzantine-blue">
@@ -86,7 +86,7 @@ export default function Welcome() {
             <Card
               variant="orthodox"
               goldBorderTop
-              className="animate-fade-in-up animation-delay-200 rounded-lg sm:flex-1 sm:basis-[calc(50%-0.5rem)]"
+              className="rounded-lg sm:flex-1 sm:basis-[calc(50%-0.5rem)]"
             >
               <CardContent className="p-6 py-0">
                 <h3 className="mb-4 text-center font-cinzel text-xl font-semibold text-byzantine-blue">
@@ -107,7 +107,7 @@ export default function Welcome() {
             <Card
               variant="orthodox"
               goldBorderTop
-              className="animate-fade-in-up animation-delay-300 w-full rounded-lg"
+              className="w-full rounded-lg"
             >
               <CardContent className="p-6 py-0">
                 <h3 className="mb-4 text-center font-cinzel text-xl font-semibold text-byzantine-blue">
