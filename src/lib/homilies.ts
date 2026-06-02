@@ -47,3 +47,14 @@ export const homilies: Homily[] = []
 
 /** Distinct speaker names for the filter dropdown. */
 export const homilySpeakers: string[] = []
+
+export function filterHomiliesBySpeaker(
+  items: Homily[],
+  speaker: string | undefined,
+): Homily[] {
+  if (!speaker || speaker === 'all') {
+    return items
+  }
+
+  return items.filter((homily) => homily.speaker === speaker)
+}
