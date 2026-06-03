@@ -3,7 +3,9 @@ import Link from 'next/link'
 import { CalendarIcon, ImageIcon } from 'lucide-react'
 
 import { Hero } from '@/components/ui/hero'
-import { formatAlbumDate, photoAlbums } from '@/lib/photo-albums'
+import { formatAlbumDate, getPhotoAlbums } from '@/lib/photo-albums'
+
+export const revalidate = 600
 
 export const metadata: Metadata = {
   title: 'Photo Albums',
@@ -11,7 +13,8 @@ export const metadata: Metadata = {
     'Photos from events and life at St. Athanasius Orthodox Church.',
 }
 
-export default function PhotoAlbumsIndex() {
+export default async function PhotoAlbumsIndex() {
+  const photoAlbums = await getPhotoAlbums()
   return (
     <>
       <Hero

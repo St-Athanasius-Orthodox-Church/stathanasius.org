@@ -1,3 +1,10 @@
+import configPromise from '@payload-config'
+import { getPayload } from 'payload'
+import { cache } from 'react'
+
+import type { Media, PhotoAlbum } from '@/payload-types'
+import { getMediaUrl } from '@/utilities/getMediaUrl'
+
 export type PhotoAlbumSummary = {
   id: string
   title: string
@@ -19,12 +26,92 @@ export type PhotoAlbumDetail = {
   photos: Photo[]
 }
 
-/** Placeholder until albums are wired from Payload. */
-export const photoAlbums: PhotoAlbumSummary[] = []
+function getMediaImageUrl(
+  media: Media,
+  size: 'thumbnail' | 'large',
+): string | null {
+  const url =
+    size === 'thumbnail'
+      ? media.sizes?.thumbnail?.url || media.thumbnailURL || media.url
+      : media.sizes?.large?.url || media.sizes?.xlarge?.url || media.url
 
-export function getPhotoAlbum(_id: string): PhotoAlbumDetail | null {
-  return null
+  return url ? getMediaUrl(url, media.updatedAt) : null
 }
+
+function toPhoto(media: Media): Photo {
+  return {
+    id: String(media.id),
+    thumbnail_url: getMediaImageUrl(media, 'thumbnail') || '',
+    carousel_url: getMediaImageUrl(media, 'large') || '',
+  }
+}
+
+function toPhotoAlbumSummary(album: PhotoAlbum): PhotoAlbumSummary {
+  const coverPhoto = typeof album.coverPhoto === 'object' ? album.coverPhoto : null
+
+  return {
+    id: String(album.id),
+    title: album.title || 'Untitled Album',
+    date: album.date || album.createdAt,
+    photo_count: album.photos?.length || 0,
+    cover_photo_url: coverPhoto ? getMediaImageUrl(coverPhoto, 'thumbnail') : null,
+  }
+}
+
+function toPhotoAlbumDetail(album: PhotoAlbum): PhotoAlbumDetail {
+  const photos = (album.photos || [])
+    .filter((photo): photo is Media => typeof photo === 'object')
+    .map(toPhoto)
+
+  return {
+    id: String(album.id),
+    title: album.title || 'Untitled Album',
+    date: album.date || album.createdAt,
+    photos,
+  }
+}
+
+export const getPhotoAlbums = cache(async (): Promise<PhotoAlbumSummary[]> => {
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: 'photo-albums',
+    depth: 1,
+    limit: 1000,
+    overrideAccess: false,
+    pagination: false,
+    sort: '-date',
+  })
+
+  return result.docs.map(toPhotoAlbumSummary)
+})
+
+export const getPhotoAlbum = cache(async (id: string): Promise<PhotoAlbumDetail | null> => {
+  const numericId = Number(id)
+
+  if (!Number.isInteger(numericId)) {
+    return null
+  }
+
+  const payload = await getPayload({ config: configPromise })
+
+  const result = await payload.find({
+    collection: 'photo-albums',
+    depth: 1,
+    limit: 1,
+    overrideAccess: false,
+    pagination: false,
+    where: {
+      id: {
+        equals: numericId,
+      },
+    },
+  })
+
+  const album = result.docs[0]
+
+  return album ? toPhotoAlbumDetail(album) : null
+})
 
 export function formatAlbumDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {
