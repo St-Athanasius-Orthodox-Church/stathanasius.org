@@ -63,7 +63,6 @@ export default buildConfig({
       connectionString: process.env.DATABASE_URL || '',
       max: 3,
       idleTimeoutMillis: 2000,
-      connectionTimeoutMillis: 1000,
     },
   }),
   collections: [Pages, Posts, Media, Categories, Users, PhotoAlbums],
