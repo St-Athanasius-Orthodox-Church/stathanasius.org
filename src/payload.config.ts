@@ -61,16 +61,12 @@ export default buildConfig({
   db: postgresAdapter({
     pool: {
       connectionString: process.env.DATABASE_URL || '',
+      max: 3,
+      idleTimeoutMillis: 2000,
+      connectionTimeoutMillis: 1000,
     },
   }),
-  collections: [
-    Pages,
-    Posts,
-    Media,
-    Categories,
-    Users,
-    PhotoAlbums,
-  ],
+  collections: [Pages, Posts, Media, Categories, Users, PhotoAlbums],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins,
