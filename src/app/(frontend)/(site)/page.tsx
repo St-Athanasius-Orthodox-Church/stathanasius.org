@@ -20,15 +20,6 @@ export const metadata: Metadata = {
 export default function Welcome() {
   return (
     <>
-      <a
-        href="https://form.jotform.com/261355174662055"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block bg-orthodox-gold px-4 py-3 text-center text-base font-semibold tracking-wide text-byzantine-blue transition-colors hover:bg-orthodox-gold/90 md:text-lg"
-      >
-        Register for SAOC Summer School 2026
-      </a>
-
       <Hero
         size="full"
         gradientIntensity="light"
@@ -54,10 +45,7 @@ export default function Welcome() {
         <h2 className="heading-orthodox mb-2 text-center text-3xl font-semibold md:text-4xl">
           Services
         </h2>
-        <div
-          className="mx-auto mb-10 h-0.5 w-16"
-          style={{ background: "var(--orthodox-gold)" }}
-        />
+        <div className="mx-auto mb-10 h-0.5 w-16" style={{ background: 'var(--orthodox-gold)' }} />
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
           {/* Service Cards */}
@@ -101,23 +89,17 @@ export default function Welcome() {
             </Card>
 
             {/* Other */}
-            <Card
-              variant="orthodox"
-              goldBorderTop
-              className="w-full rounded-lg"
-            >
+            <Card variant="orthodox" goldBorderTop className="w-full rounded-lg">
               <CardContent className="p-6 py-0">
                 <h3 className="mb-4 text-center font-cinzel text-xl font-semibold text-byzantine-blue">
                   Other
                 </h3>
                 <div className="mb-4 flex justify-between gap-2">
                   <span className="font-medium">Daily Vespers</span>
-                  <span className="text-sm text-burgundy">
-                    Tuesday/Thursday 5:30 PM
-                  </span>
+                  <span className="text-sm text-burgundy">Tuesday/Thursday 5:30 PM</span>
                 </div>
                 <p className="leading-relaxed">
-                  For weekday and feast day services, please check the{" "}
+                  For weekday and feast day services, please check the{' '}
                   <Hyperlink href="/calendar" className="font-medium">
                     calendar
                   </Hyperlink>
@@ -136,7 +118,7 @@ export default function Welcome() {
           {/* Google Maps */}
           <div
             className="overflow-hidden rounded-lg shadow-lg"
-            style={{ border: "2px solid var(--parchment)" }}
+            style={{ border: '2px solid var(--parchment)' }}
           >
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3290.716770163627!2d-119.81655222239607!3d34.43394877301571!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x80e93f69b6b77a29%3A0x310258d0bbe016e4!2sSt.%20Athanasius%20Orthodox%20Church!5e0!3m2!1sen!2sus!4v1765230570761!5m2!1sen!2sus"
@@ -152,18 +134,11 @@ export default function Welcome() {
       </section>
 
       {/* About Section */}
-      <section
-        className="py-16"
-        style={{ background: "var(--soft-cream)" }}
-        id="what-is-orthodoxy"
-      >
+      <section className="py-16" style={{ background: 'var(--soft-cream)' }} id="what-is-orthodoxy">
         <h2 className="heading-orthodox mb-2 text-center text-3xl font-semibold md:text-4xl">
           What is Orthodox Christianity?
         </h2>
-        <div
-          className="mx-auto mb-10 h-0.5 w-16"
-          style={{ background: "var(--orthodox-gold)" }}
-        />
+        <div className="mx-auto mb-10 h-0.5 w-16" style={{ background: 'var(--orthodox-gold)' }} />
 
         <div className="container mx-auto flex max-w-6xl flex-col gap-16 px-4">
           {/* What is the Orthodox Church? */}
@@ -172,25 +147,18 @@ export default function Welcome() {
               <h2 className="heading-orthodox mb-4 text-2xl font-semibold md:text-3xl">
                 What is the Orthodox Church?
               </h2>
-              <div
-                className="mb-6 h-0.5 w-12"
-                style={{ background: "var(--orthodox-gold)" }}
-              />
-              <div
-                className="prose prose-lg max-w-none"
-                style={{ color: "var(--byzantine-blue)" }}
-              >
+              <div className="mb-6 h-0.5 w-12" style={{ background: 'var(--orthodox-gold)' }} />
+              <div className="prose prose-lg max-w-none" style={{ color: 'var(--byzantine-blue)' }}>
                 <p>
-                  To be Orthodox is to have the correct and complete (Ortho-)
-                  doctrine and worship (-dox) of Jesus Christ and to live as He
-                  taught us to live; that is, to love God with all your heart,
-                  with all your soul, with all your mind, with all your
+                  To be Orthodox is to have the correct and complete (Ortho-) doctrine and worship
+                  (-dox) of Jesus Christ and to live as He taught us to live; that is, to love God
+                  with all your heart, with all your soul, with all your mind, with all your
                   strength, and to love your neighbor as yourself.
                 </p>
                 <p>
                   <strong>
-                    The Orthodox Church is the gathering of the believers to be
-                    the Body of Jesus Christ
+                    The Orthodox Church is the gathering of the believers to be the Body of Jesus
+                    Christ
                   </strong>
                   <br />
                   <strong>We gather in His name</strong>
@@ -198,25 +166,20 @@ export default function Welcome() {
                   <strong>We share a common faith and love in Him</strong>
                   <br />
                   <strong>
-                    We affirm the truth and fullness of our faith and experience
-                    of Him
+                    We affirm the truth and fullness of our faith and experience of Him
                   </strong>
                   <br />
-                  <strong>
-                    We proclaim the Good News of Jesus Christ in word and deed.
-                  </strong>
+                  <strong>We proclaim the Good News of Jesus Christ in word and deed.</strong>
                 </p>
                 <p>
-                  The Orthodox Church traces its origin back to Jesus Christ and
-                  His Apostles and came into the fullness of its life on
-                  Pentecost, 50 days after Jesus Christ's defeat of death by His
-                  rising from the dead. We are part of the unbroken chain of the
-                  Apostles' laying on of hands from one Bishop to the next as
-                  they established communities that worship, fellowship, serve,
-                  and grow in discipleship throughout the world. Today there are
-                  over 250 million Eastern Orthodox Christians throughout the
-                  world and over 1.5 million in the United States who gather in
-                  some 2800 parishes and monasteries.
+                  The Orthodox Church traces its origin back to Jesus Christ and His Apostles and
+                  came into the fullness of its life on Pentecost, 50 days after Jesus Christ's
+                  defeat of death by His rising from the dead. We are part of the unbroken chain of
+                  the Apostles' laying on of hands from one Bishop to the next as they established
+                  communities that worship, fellowship, serve, and grow in discipleship throughout
+                  the world. Today there are over 250 million Eastern Orthodox Christians throughout
+                  the world and over 1.5 million in the United States who gather in some 2800
+                  parishes and monasteries.
                 </p>
               </div>
             </div>
@@ -231,7 +194,7 @@ export default function Welcome() {
                 <div
                   className="absolute inset-0 rounded-lg ring-1 ring-inset"
                   style={{
-                    ["--tw-ring-color" as string]: "var(--orthodox-gold)",
+                    ['--tw-ring-color' as string]: 'var(--orthodox-gold)',
                     opacity: 0.3,
                   }}
                 />
@@ -245,39 +208,26 @@ export default function Welcome() {
               <h2 className="heading-orthodox mb-4 text-2xl font-semibold md:text-3xl">
                 What will I see?
               </h2>
-              <div
-                className="mb-6 h-0.5 w-12"
-                style={{ background: "var(--orthodox-gold)" }}
-              />
-              <div
-                className="prose prose-lg max-w-none"
-                style={{ color: "var(--byzantine-blue)" }}
-              >
+              <div className="mb-6 h-0.5 w-12" style={{ background: 'var(--orthodox-gold)' }} />
+              <div className="prose prose-lg max-w-none" style={{ color: 'var(--byzantine-blue)' }}>
                 <p>
-                  In our parish you will see a community united together as we
-                  turn toward our Savior and God, Jesus Christ, the Son of the
-                  Heavenly Father. You will find people embracing a way of life
-                  set apart from the world even as we live in it. You will
-                  experience a community preserving, through the activity of the
-                  Holy Spirit, the deposit of Faith given to us from Jesus
-                  Christ through the Apostles. You will see a people
-                  experiencing and acknowledging the holiness and majesty of
-                  God.
+                  In our parish you will see a community united together as we turn toward our
+                  Savior and God, Jesus Christ, the Son of the Heavenly Father. You will find people
+                  embracing a way of life set apart from the world even as we live in it. You will
+                  experience a community preserving, through the activity of the Holy Spirit, the
+                  deposit of Faith given to us from Jesus Christ through the Apostles. You will see
+                  a people experiencing and acknowledging the holiness and majesty of God.
                 </p>
               </div>
             </div>
 
             <div className="flex-1">
               <div className="relative overflow-hidden rounded-lg shadow-xl">
-                <img
-                  src={fr1Url}
-                  alt="What will I see?"
-                  className="h-auto w-full"
-                />
+                <img src={fr1Url} alt="What will I see?" className="h-auto w-full" />
                 <div
                   className="absolute inset-0 rounded-lg ring-1 ring-inset"
                   style={{
-                    ["--tw-ring-color" as string]: "var(--orthodox-gold)",
+                    ['--tw-ring-color' as string]: 'var(--orthodox-gold)',
                     opacity: 0.3,
                   }}
                 />
@@ -291,58 +241,42 @@ export default function Welcome() {
               <h2 className="heading-orthodox mb-4 text-2xl font-semibold md:text-3xl">
                 What we believe
               </h2>
-              <div
-                className="mb-6 h-0.5 w-12"
-                style={{ background: "var(--orthodox-gold)" }}
-              />
-              <div
-                className="prose prose-lg max-w-none"
-                style={{ color: "var(--byzantine-blue)" }}
-              >
+              <div className="mb-6 h-0.5 w-12" style={{ background: 'var(--orthodox-gold)' }} />
+              <div className="prose prose-lg max-w-none" style={{ color: 'var(--byzantine-blue)' }}>
                 <p>
-                  We believe in the Holy Trinity: Father, Son, and Holy Spirit;
-                  one in essence and in love and distinct only in persons, whom
-                  we worship and glorify. We believe in the Son who became Man
-                  for our salvation who suffered and died and rose from the dead
-                  during the reign of Pontius Pilate.
+                  We believe in the Holy Trinity: Father, Son, and Holy Spirit; one in essence and
+                  in love and distinct only in persons, whom we worship and glorify. We believe in
+                  the Son who became Man for our salvation who suffered and died and rose from the
+                  dead during the reign of Pontius Pilate.
                 </p>
                 <p>
-                  We believe in the scriptures of the Old and New Testament as
-                  the record of God's works with His People and understand them
-                  through the activity of the Holy Spirit who preserves and
-                  guides unchanging Tradition of the Church. We believe that the
-                  Tradition is Holy and is the life of God's people and unites
-                  us believers throughout time. All of these attest to our
-                  salvation in Jesus Christ.
+                  We believe in the scriptures of the Old and New Testament as the record of God's
+                  works with His People and understand them through the activity of the Holy Spirit
+                  who preserves and guides unchanging Tradition of the Church. We believe that the
+                  Tradition is Holy and is the life of God's people and unites us believers
+                  throughout time. All of these attest to our salvation in Jesus Christ.
                 </p>
                 <p>
-                  We believe that the Church is One Holy Catholic and Apostolic
-                  and preserved by the promise of Jesus Christ that "the gates
-                  of hell will not prevail against it."
+                  We believe that the Church is One Holy Catholic and Apostolic and preserved by the
+                  promise of Jesus Christ that "the gates of hell will not prevail against it."
                 </p>
                 <p>
-                  We believe that the Church is where we are able to work out
-                  our salvation in Jesus Christ freely with fear and trembling
-                  that we may be united to God.
+                  We believe that the Church is where we are able to work out our salvation in Jesus
+                  Christ freely with fear and trembling that we may be united to God.
                 </p>
                 <p>
-                  Every Sunday During the Divine Liturgy, and at many other
-                  times, we proclaim these things in unison by reciting the
-                  Nicene-Constantinopolitan Creed.
+                  Every Sunday During the Divine Liturgy, and at many other times, we proclaim these
+                  things in unison by reciting the Nicene-Constantinopolitan Creed.
                 </p>
               </div>
             </div>
             <div className="flex-1">
               <div className="relative overflow-hidden rounded-lg shadow-xl">
-                <img
-                  src={preachUrl}
-                  alt="What we believe"
-                  className="h-auto w-full"
-                />
+                <img src={preachUrl} alt="What we believe" className="h-auto w-full" />
                 <div
                   className="absolute inset-0 rounded-lg ring-1 ring-inset"
                   style={{
-                    ["--tw-ring-color" as string]: "var(--orthodox-gold)",
+                    ['--tw-ring-color' as string]: 'var(--orthodox-gold)',
                     opacity: 0.3,
                   }}
                 />
@@ -355,51 +289,37 @@ export default function Welcome() {
               <h2 className="heading-orthodox mb-4 text-2xl font-semibold md:text-3xl">
                 How we live
               </h2>
-              <div
-                className="mb-6 h-0.5 w-12"
-                style={{ background: "var(--orthodox-gold)" }}
-              />
-              <div
-                className="prose prose-lg max-w-none"
-                style={{ color: "var(--byzantine-blue)" }}
-              >
+              <div className="mb-6 h-0.5 w-12" style={{ background: 'var(--orthodox-gold)' }} />
+              <div className="prose prose-lg max-w-none" style={{ color: 'var(--byzantine-blue)' }}>
                 <p>
-                  We serve God through our public worship, the serving of the
-                  Sacraments and in our private prayers. Weekly we gather to
-                  proclaim His salvation, participate in the common action of
-                  the Divine Liturgy, and commune with God in the Sacrament of
-                  Eucharist. We gather more often during the week for communal
-                  prayer services to know God, discern His will, to thank Him,
-                  and to ask for his mercy and grace. Through the year we
-                  celebrate Feast Days that are commemorations and enactments of
-                  the events of our salvation. We regularly serve the sacraments
-                  to be united to God throughout our lives.
+                  We serve God through our public worship, the serving of the Sacraments and in our
+                  private prayers. Weekly we gather to proclaim His salvation, participate in the
+                  common action of the Divine Liturgy, and commune with God in the Sacrament of
+                  Eucharist. We gather more often during the week for communal prayer services to
+                  know God, discern His will, to thank Him, and to ask for his mercy and grace.
+                  Through the year we celebrate Feast Days that are commemorations and enactments of
+                  the events of our salvation. We regularly serve the sacraments to be united to God
+                  throughout our lives.
                 </p>
                 <p>
-                  We serve others through fellowship, discipleship, and
-                  stewardship. In our fellowship we are united in our common
-                  faith and life as we travel further into the Kingdom of God.
-                  We serve each other with love, respect, and hospitality as
-                  fellow members in the Body of Christ. We are discipled in the
-                  Church through the Pastoral relationship with our priest to
-                  deepen our communion with God. We are stewards of the gifts
-                  God has given us by offering our time, talents, and treasures
-                  back to Him in the communal life of the parish.
+                  We serve others through fellowship, discipleship, and stewardship. In our
+                  fellowship we are united in our common faith and life as we travel further into
+                  the Kingdom of God. We serve each other with love, respect, and hospitality as
+                  fellow members in the Body of Christ. We are discipled in the Church through the
+                  Pastoral relationship with our priest to deepen our communion with God. We are
+                  stewards of the gifts God has given us by offering our time, talents, and
+                  treasures back to Him in the communal life of the parish.
                 </p>
               </div>
             </div>
 
             <div className="flex-1">
               <div className="relative overflow-hidden rounded-lg shadow-xl">
-                <img
-                  src={bishopUrl}
-                  alt="What will I see?"
-                  className="h-auto w-full"
-                />
+                <img src={bishopUrl} alt="What will I see?" className="h-auto w-full" />
                 <div
                   className="absolute inset-0 rounded-lg ring-1 ring-inset"
                   style={{
-                    ["--tw-ring-color" as string]: "var(--orthodox-gold)",
+                    ['--tw-ring-color' as string]: 'var(--orthodox-gold)',
                     opacity: 0.3,
                   }}
                 />
@@ -410,17 +330,11 @@ export default function Welcome() {
       </section>
 
       {/* Contact Us Section */}
-      <section
-        id="contact-us"
-        className="container mx-auto max-w-3xl px-4 py-16"
-      >
+      <section id="contact-us" className="container mx-auto max-w-3xl px-4 py-16">
         <h2 className="heading-orthodox mb-2 text-center text-3xl font-semibold md:text-4xl">
           Contact Us
         </h2>
-        <div
-          className="mx-auto mb-10 h-0.5 w-16"
-          style={{ background: "var(--orthodox-gold)" }}
-        />
+        <div className="mx-auto mb-10 h-0.5 w-16" style={{ background: 'var(--orthodox-gold)' }} />
 
         <Card variant="orthodox" className="rounded-lg">
           <CardContent className="grid gap-6 p-8 py-0 sm:grid-cols-2">
@@ -468,9 +382,7 @@ export default function Welcome() {
                 <ClockIcon className="mr-2 inline-block h-4 w-4 text-orthodox-gold" />
                 Office Hours
               </h3>
-              <span className="h-auto p-0">
-                Tuesday - Friday: 12:00 PM - 5:00 PM
-              </span>
+              <span className="h-auto p-0">Tuesday - Friday: 12:00 PM - 5:00 PM</span>
             </div>
           </CardContent>
         </Card>
