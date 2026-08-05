@@ -1,8 +1,13 @@
 'use client'
 
-import FsLightbox from 'fslightbox-react'
+import dynamic from 'next/dynamic'
 import { CalendarIcon, ImageIcon } from 'lucide-react'
 import { useState } from 'react'
+
+// fslightbox accesses browser globals while it initializes. Keep it out of the
+// server-rendered album route so the gallery cannot prevent the page itself
+// from rendering.
+const FsLightbox = dynamic(() => import('fslightbox-react'), { ssr: false })
 
 import type { Photo } from '@/lib/photo-albums'
 
@@ -17,10 +22,10 @@ export function PhotoAlbumGallery({ photos }: PhotoAlbumGalleryProps) {
   })
 
   const openLightbox = (index: number) => {
-    setLightboxController({
-      toggler: !lightboxController.toggler,
+    setLightboxController((current) => ({
+      toggler: !current.toggler,
       slide: index + 1,
-    })
+    }))
   }
 
   const carouselUrls = photos.map((photo) => photo.carousel_url)
