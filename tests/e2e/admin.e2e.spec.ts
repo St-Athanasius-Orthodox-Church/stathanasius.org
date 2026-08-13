@@ -32,9 +32,9 @@ test.describe('Admin Panel', () => {
     await expect(listViewArtifact).toBeVisible()
   })
 
-  test('can navigate to edit view', async () => {
-    await page.goto('http://localhost:3000/admin/collections/pages/create')
-    await expect(page).toHaveURL(/\/admin\/collections\/pages\/[a-zA-Z0-9-_]+/)
+  test('can navigate to photo album edit view', async () => {
+    await page.goto('http://localhost:3000/admin/collections/photo-albums/create')
+    await expect(page).toHaveURL(/\/admin\/collections\/photo-albums\/[a-zA-Z0-9-_]+/)
     const editViewArtifact = page.locator('input[name="title"]')
     await expect(editViewArtifact).toBeVisible()
   })
