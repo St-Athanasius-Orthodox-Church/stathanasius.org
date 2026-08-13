@@ -255,7 +255,7 @@ export interface PhotoAlbum {
   id: number;
   title: string;
   date: string;
-  coverPhoto: number | Media;
+  coverPhoto?: (number | null) | Media;
   photos: (number | Media)[];
   updatedAt: string;
   createdAt: string;

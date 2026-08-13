@@ -1,6 +1,7 @@
 'use client'
 
 import dynamic from 'next/dynamic'
+import Image from 'next/image'
 import { CalendarIcon, ImageIcon } from 'lucide-react'
 import { useState } from 'react'
 
@@ -57,10 +58,12 @@ export function PhotoAlbumGallery({ photos }: PhotoAlbumGalleryProps) {
             onClick={() => openLightbox(index)}
             className="group relative aspect-square overflow-hidden rounded-lg bg-muted focus:outline-none focus:ring-2 focus:ring-orthodox-gold focus:ring-offset-2"
           >
-            <img
+            <Image
               src={photo.thumbnail_url}
               alt={`Photo ${index + 1}`}
+              fill
               className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+              sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
             />
             <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/20" />
           </button>

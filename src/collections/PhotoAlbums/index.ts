@@ -37,7 +37,7 @@ export const PhotoAlbums: CollectionConfig<'photo-albums'> = {
       type: 'upload',
       relationTo: 'media',
       filterOptions: { mimeType: { contains: 'image' } },
-      required: true,
+      required: false,
     },
     {
       name: 'photos',

@@ -13,6 +13,14 @@ export type PhotoAlbumSummary = {
   cover_photo_url: string | null
 }
 
+export type PhotoAlbumPage = {
+  docs: PhotoAlbumSummary[]
+  hasNextPage: boolean
+  hasPrevPage: boolean
+  page: number
+  totalPages: number
+}
+
 export type Photo = {
   id: string
   thumbnail_url: string
@@ -26,10 +34,7 @@ export type PhotoAlbumDetail = {
   photos: Photo[]
 }
 
-function getMediaImageUrl(
-  media: Media,
-  size: 'thumbnail' | 'large',
-): string | null {
+function getMediaImageUrl(media: Media, size: 'thumbnail' | 'large'): string | null {
   const url =
     size === 'thumbnail'
       ? media.sizes?.thumbnail?.url || media.thumbnailURL || media.url
@@ -47,7 +52,12 @@ function toPhoto(media: Media): Photo {
 }
 
 function toPhotoAlbumSummary(album: PhotoAlbum): PhotoAlbumSummary {
-  const coverPhoto = typeof album.coverPhoto === 'object' ? album.coverPhoto : null
+  const coverPhoto =
+    typeof album.coverPhoto === 'object' && album.coverPhoto
+      ? album.coverPhoto
+      : album.photos?.find(
+          (photo): photo is Media => photo !== null && typeof photo === 'object',
+        )
 
   return {
     id: String(album.id),
@@ -71,19 +81,25 @@ function toPhotoAlbumDetail(album: PhotoAlbum): PhotoAlbumDetail {
   }
 }
 
-export const getPhotoAlbums = cache(async (): Promise<PhotoAlbumSummary[]> => {
+export const getPhotoAlbums = cache(async (page = 1): Promise<PhotoAlbumPage> => {
   const payload = await getPayload({ config: configPromise })
 
   const result = await payload.find({
     collection: 'photo-albums',
     depth: 1,
-    limit: 1000,
+    limit: 20,
     overrideAccess: false,
-    pagination: false,
+    page,
     sort: '-date',
   })
 
-  return result.docs.map(toPhotoAlbumSummary)
+  return {
+    docs: result.docs.map(toPhotoAlbumSummary),
+    hasNextPage: result.hasNextPage,
+    hasPrevPage: result.hasPrevPage,
+    page: result.page || page,
+    totalPages: result.totalPages,
+  }
 })
 
 export const getPhotoAlbum = cache(async (id: string): Promise<PhotoAlbumDetail | null> => {

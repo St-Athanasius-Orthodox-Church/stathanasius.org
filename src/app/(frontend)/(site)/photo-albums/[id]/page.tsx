@@ -18,7 +18,7 @@ type PageProps = {
 export async function generateStaticParams() {
   const albums = await getPhotoAlbums()
 
-  return albums.map(({ id }) => ({
+  return albums.docs.map(({ id }) => ({
     id,
   }))
 }
