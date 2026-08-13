@@ -54,6 +54,7 @@ export const plugins: Plugin[] = [
     },
   }),
   vercelBlobStorage({
+    enabled: process.env.NODE_ENV !== 'development',
     clientUploads: true,
     collections: {
       media: true,
