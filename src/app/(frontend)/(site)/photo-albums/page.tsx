@@ -3,7 +3,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { CalendarIcon, ChevronLeftIcon, ChevronRightIcon, ImageIcon } from 'lucide-react'
 
-import { buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button-variants'
 import { Hero } from '@/components/ui/hero'
 import { formatAlbumDate, getPhotoAlbums } from '@/lib/photo-albums'
 import { Pagination, PaginationContent, PaginationItem } from '@/components/ui/pagination'

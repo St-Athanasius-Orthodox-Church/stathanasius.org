@@ -111,7 +111,7 @@ function Hero({
           )}
         </div>
       ) : children ? (
-        <div className="z-10 w-full max-w-md px-4">{children}</div>
+        <div className="z-10 w-full max-w-4xl px-4">{children}</div>
       ) : null}
 
       {/* Decorative bottom border */}
