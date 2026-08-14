@@ -1,10 +1,28 @@
+import configPromise from '@payload-config'
+import { getPayload } from 'payload'
+import { cache } from 'react'
+
+import type { Audio, Homily as PayloadHomily, Media, Person } from '@/payload-types'
+import { getMediaUrl } from '@/utilities/getMediaUrl'
+
 export interface Homily {
-  id: number
+  id: string
   title: string
   speaker: string
   date: string
   audio_url: string | null
   audio_download_url: string | null
+  speaker_image_url: string | null
+}
+
+export interface HomilyPage {
+  docs: Homily[]
+  speakers: string[]
+  selectedSpeaker: string
+  hasNextPage: boolean
+  hasPrevPage: boolean
+  page: number
+  totalPages: number
 }
 
 const frSymeonUrl = '/assets/fr-symeon.jpg'
@@ -33,6 +51,44 @@ export function getSpeakerImage(speaker: string): string | null {
   return speakerImageMap[speaker] ?? null
 }
 
+function getSpeakerPhotoUrl(person: Person | null): string | null {
+  if (!person || typeof person.photo !== 'object' || !person.photo) {
+    return null
+  }
+
+  const photo = person.photo as Media
+  const url = photo.sizes?.small?.url || photo.sizes?.thumbnail?.url || photo.url
+
+  return url ? getMediaUrl(url, photo.updatedAt) : null
+}
+
+function getAudioUrl(audio: Audio | null): string | null {
+  if (!audio) return null
+
+  if (audio.url) {
+    return getMediaUrl(audio.url, audio.updatedAt)
+  }
+
+  return audio.filename ? `/audios/${encodeURIComponent(audio.filename)}` : null
+}
+
+function toHomily(doc: PayloadHomily): Homily {
+  const person = typeof doc.speaker === 'object' ? doc.speaker : null
+  const audio = typeof doc.audio === 'object' ? doc.audio : null
+  const speaker = person?.name || 'Unknown speaker'
+  const audioUrl = getAudioUrl(audio)
+
+  return {
+    id: String(doc.id),
+    title: doc.title,
+    speaker,
+    date: doc.date,
+    audio_url: audioUrl,
+    audio_download_url: audioUrl,
+    speaker_image_url: getSpeakerPhotoUrl(person) || getSpeakerImage(speaker),
+  }
+}
+
 export function formatHomilyDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('en-US', {
     year: 'numeric',
@@ -42,19 +98,45 @@ export function formatHomilyDate(dateString: string): string {
   })
 }
 
-/** Populated when audio recordings are wired up from Payload. */
-export const homilies: Homily[] = []
+export const getHomilies = cache(
+  async (page = 1, requestedSpeaker?: string): Promise<HomilyPage> => {
+    const payload = await getPayload({ config: configPromise })
 
-/** Distinct speaker names for the filter dropdown. */
-export const homilySpeakers: string[] = []
+    const speakerSource = await payload.find({
+      collection: 'homilies',
+      depth: 1,
+      limit: 1000,
+      pagination: false,
+      overrideAccess: false,
+    })
+    const speakerDocs = speakerSource.docs
+      .map((homily) => (typeof homily.speaker === 'object' ? homily.speaker : null))
+      .filter((person): person is Person => person !== null)
+    const speakers = [...new Set(speakerDocs.map((person) => person.name))].sort((a, b) =>
+      a.localeCompare(b),
+    )
+    const selectedSpeaker =
+      requestedSpeaker && speakers.includes(requestedSpeaker) ? requestedSpeaker : 'all'
+    const selectedPerson = speakerDocs.find((person) => person.name === selectedSpeaker)
 
-export function filterHomiliesBySpeaker(
-  items: Homily[],
-  speaker: string | undefined,
-): Homily[] {
-  if (!speaker || speaker === 'all') {
-    return items
-  }
+    const result = await payload.find({
+      collection: 'homilies',
+      depth: 2,
+      limit: 20,
+      page,
+      overrideAccess: false,
+      sort: '-date',
+      ...(selectedPerson ? { where: { speaker: { equals: selectedPerson.id } } } : {}),
+    })
 
-  return items.filter((homily) => homily.speaker === speaker)
-}
+    return {
+      docs: result.docs.map(toHomily),
+      speakers,
+      selectedSpeaker,
+      hasNextPage: result.hasNextPage,
+      hasPrevPage: result.hasPrevPage,
+      page: result.page || page,
+      totalPages: result.totalPages,
+    }
+  },
+)

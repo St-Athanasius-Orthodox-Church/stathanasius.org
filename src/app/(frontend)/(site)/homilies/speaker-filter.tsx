@@ -1,9 +1,8 @@
 'use client'
 
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from '@/components/ui/native-select'
+import { useRouter } from 'next/navigation'
+
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 
 type SpeakerFilterProps = {
   speakers: string[]
@@ -11,23 +10,11 @@ type SpeakerFilterProps = {
 }
 
 export function SpeakerFilter({ speakers, selectedSpeaker }: SpeakerFilterProps) {
+  const router = useRouter()
+
   return (
-    <form
-      action="/homilies"
-      method="get"
-      className="mb-6 flex items-center gap-4"
-      onSubmit={(event) => {
-        const speaker = new FormData(event.currentTarget).get('speaker')
-        if (speaker === 'all') {
-          event.preventDefault()
-          window.location.assign('/homilies')
-        }
-      }}
-    >
-      <label
-        htmlFor="speaker-filter"
-        className="text-sm font-medium text-byzantine-blue"
-      >
+    <form action="/homilies" method="get" className="mb-6 flex items-center gap-4">
+      <label htmlFor="speaker-filter" className="text-sm font-medium text-byzantine-blue">
         Filter by speaker:
       </label>
       <NativeSelect
@@ -36,7 +23,10 @@ export function SpeakerFilter({ speakers, selectedSpeaker }: SpeakerFilterProps)
         defaultValue={selectedSpeaker}
         className="w-[250px]"
         onChange={(event) => {
-          event.currentTarget.form?.requestSubmit()
+          const speaker = event.currentTarget.value
+          router.push(
+            speaker === 'all' ? '/homilies' : `/homilies?speaker=${encodeURIComponent(speaker)}`,
+          )
         }}
       >
         <NativeSelectOption value="all">All speakers</NativeSelectOption>
