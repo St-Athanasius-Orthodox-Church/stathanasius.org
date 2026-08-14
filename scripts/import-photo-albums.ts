@@ -5,23 +5,56 @@ import { basename, extname } from 'node:path'
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import type { File } from 'payload'
+import { z } from 'zod'
 import type { Media, PhotoAlbum } from '@/payload-types'
 
 const DEFAULT_API_URL = 'https://www.stathanasius.org/photo_albums.json'
 const API_URL = process.env.OLD_PHOTO_ALBUMS_API_URL || DEFAULT_API_URL
 
-type JsonObject = Record<string, unknown>
+const albumSummarySchema = z.object({
+  id: z.number().int(),
+  title: z.string().min(1),
+  date: z.iso.date(),
+  photo_count: z.number().int().nonnegative(),
+  cover_photo_url: z.url().nullable(),
+})
 
-type OldPhotoAlbum = {
-  id: string | number
+const albumListSchema = z.object({
+  photo_albums: z.array(albumSummarySchema),
+  pagination: z.object({
+    current_page: z.number().int().positive(),
+    total_pages: z.number().int().positive(),
+    total_count: z.number().int().nonnegative(),
+  }),
+})
+
+const albumDetailSchema = z.object({
+  photo_album: z.object({
+    id: z.number().int(),
+    title: z.string().min(1),
+    date: z.iso.date(),
+  }),
+  photos: z
+    .array(
+      z.object({
+        id: z.number().int(),
+        thumbnail_url: z.url(),
+        carousel_url: z.url(),
+        file_url: z.url(),
+      }),
+    )
+    .min(1),
+})
+
+type ImportedAlbum = {
+  id: number
   title: string
   date: string
   coverUrl: string | null
-  photos: OldPhoto[]
+  photos: ImportedPhoto[]
 }
 
-type OldPhoto = {
-  id: string | number | null
+type ImportedPhoto = {
   fileUrl: string
 }
 
@@ -30,146 +63,23 @@ type UploadedPhoto = {
   filename: string
 }
 
-function asObject(value: unknown): JsonObject | null {
-  return typeof value === 'object' && value !== null && !Array.isArray(value)
-    ? (value as JsonObject)
-    : null
-}
+function parseJson<T>(schema: z.ZodType<T>, value: unknown, description: string): T {
+  const result = schema.safeParse(value)
 
-function asString(value: unknown): string | null {
-  return typeof value === 'string' && value.trim() ? value.trim() : null
-}
-
-function asArray(value: unknown): unknown[] {
-  if (Array.isArray(value)) return value
-
-  const object = asObject(value)
-  if (!object) return []
-
-  for (const key of ['data', 'docs', 'photo_albums', 'photoAlbums', 'photos']) {
-    if (Array.isArray(object[key])) return object[key]
+  if (!result.success) {
+    throw new Error(`The API returned invalid data for ${description}:\n${z.prettifyError(result.error)}`)
   }
 
-  return []
+  return result.data
 }
 
-function firstString(object: JsonObject, keys: string[]): string | null {
-  for (const key of keys) {
-    const value = asString(object[key])
-    if (value) return value
-  }
-
-  return null
-}
-
-function unwrapObject(value: unknown, keys: string[]): JsonObject | null {
-  const object = asObject(value)
-  if (!object) return null
-
-  for (const key of keys) {
-    const nested = asObject(object[key])
-    if (nested) return nested
-  }
-
-  return object
-}
-
-function getFileUrl(value: unknown, baseUrl: string): string | null {
-  const object = asObject(value)
-  const fileUrl = object ? firstString(object, ['file_url', 'fileUrl']) : asString(value)
-
-  if (!fileUrl) return null
-
-  return new URL(fileUrl, baseUrl).toString()
-}
-
-function getFilename(fileUrl: string): string {
-  const pathname = new URL(fileUrl).pathname
-  const filename = decodeURIComponent(basename(pathname))
-
-  if (filename && filename !== '.' && filename !== '/') return filename
-
-  throw new Error(`The file URL has no filename: ${fileUrl}`)
-}
-
-function getCoverUrl(object: JsonObject, baseUrl: string): string | null {
-  for (const key of ['cover_photo', 'coverPhoto', 'cover_photo_url', 'coverPhotoUrl', 'cover']) {
-    const url = getFileUrl(object[key], baseUrl)
-    if (url) return url
-  }
-
-  return null
-}
-
-function getPhotos(object: JsonObject): unknown[] {
-  for (const key of ['photos', 'images']) {
-    const photos = asArray(object[key])
-    if (photos.length > 0) return photos
-  }
-
-  return []
-}
-
-function getAlbumDetailUrl(id: string | number): string {
+function getAlbumDetailUrl(id: number): string {
   const listUrl = new URL(API_URL)
   listUrl.pathname = listUrl.pathname.replace(/\.json$/, '/')
   return new URL(`${encodeURIComponent(String(id))}.json`, listUrl).toString()
 }
 
-function parseAlbum(value: unknown, baseUrl: string): OldPhotoAlbum {
-  const rootObject = asObject(value)
-  const nestedObject = unwrapObject(value, ['photo_album', 'photoAlbum', 'album', 'data'])
-  const object =
-    rootObject && nestedObject && rootObject !== nestedObject
-      ? { ...rootObject, ...nestedObject }
-      : nestedObject
-
-  if (!object) throw new Error('The API returned an invalid photo album.')
-
-  const id = object.id
-  const title = firstString(object, ['title', 'name'])
-  const date = firstString(object, [
-    'date',
-    'published_at',
-    'publishedAt',
-    'created_at',
-    'createdAt',
-  ])
-
-  if ((typeof id !== 'string' && typeof id !== 'number') || !title || !date) {
-    throw new Error(`The API returned an incomplete photo album: ${JSON.stringify(object)}`)
-  }
-
-  const photos = getPhotos(object).map((photo, index) => {
-    const photoObject = asObject(photo)
-    const fileUrl = getFileUrl(photoObject?.file_url ?? photoObject?.fileUrl, baseUrl)
-
-    if (!fileUrl) {
-      throw new Error(`Photo ${index + 1} in album ${String(id)} has no file_url.`)
-    }
-
-    const photoId = photoObject?.id
-
-    return {
-      id: typeof photoId === 'string' || typeof photoId === 'number' ? photoId : null,
-      fileUrl,
-    }
-  })
-
-  if (photos.length === 0) {
-    throw new Error(`Photo album ${String(id)} has no photos.`)
-  }
-
-  return {
-    id,
-    title,
-    date: new Date(date).toISOString(),
-    coverUrl: getCoverUrl(object, baseUrl),
-    photos,
-  }
-}
-
-async function fetchJson(url: string): Promise<unknown> {
+async function fetchJsonResponse(url: string): Promise<unknown> {
   const response = await fetch(url)
 
   if (!response.ok) {
@@ -179,37 +89,50 @@ async function fetchJson(url: string): Promise<unknown> {
   return response.json()
 }
 
-async function fetchAlbums(): Promise<OldPhotoAlbum[]> {
-  const listResponse = await fetchJson(API_URL)
-  const list = asArray(listResponse)
+async function fetchAlbums(limit: number | undefined): Promise<ImportedAlbum[]> {
+  const albums: ImportedAlbum[] = []
+  const listUrl = new URL(API_URL)
 
-  if (list.length === 0) {
-    throw new Error('The photo album list is empty or has an unsupported response shape.')
-  }
+  while (true) {
+    const pageUrl = listUrl.toString()
+    const list = parseJson(albumListSchema, await fetchJsonResponse(pageUrl), pageUrl)
 
-  const albums: OldPhotoAlbum[] = []
-
-  for (const summary of list) {
-    const summaryObject = unwrapObject(summary, ['photo_album', 'photoAlbum', 'album', 'data'])
-    const id = summaryObject?.id
-
-    if (typeof id !== 'string' && typeof id !== 'number') {
-      throw new Error(
-        `The photo album list contains an item without an id: ${JSON.stringify(summary)}`,
+    for (const summary of list.photo_albums) {
+      const detailUrl = getAlbumDetailUrl(summary.id)
+      const detail = parseJson(
+        albumDetailSchema,
+        await fetchJsonResponse(detailUrl),
+        `photo album ${summary.id}`,
       )
+
+      albums.push({
+        id: detail.photo_album.id,
+        title: detail.photo_album.title,
+        date: new Date(detail.photo_album.date).toISOString(),
+        coverUrl: summary.cover_photo_url,
+        photos: detail.photos.map((photo) => ({ fileUrl: photo.file_url })),
+      })
+
+      if (limit !== undefined && albums.length >= limit) return albums
     }
 
-    const detailUrl = getAlbumDetailUrl(id)
-    const detailResponse = await fetchJson(detailUrl)
-    const detailObject = asObject(detailResponse)
+    if (list.pagination.current_page >= list.pagination.total_pages) break
 
-    if (!detailObject) throw new Error(`The API returned an invalid album for id ${String(id)}.`)
-
-    const mergedObject = { ...summaryObject, ...detailObject }
-    albums.push(parseAlbum(mergedObject, API_URL))
+    listUrl.searchParams.set('page', String(list.pagination.current_page + 1))
   }
 
   return albums
+}
+
+function getFilename(fileUrl: string): string {
+  const pathname = new URL(fileUrl).pathname
+  const filename = decodeURIComponent(basename(pathname))
+
+  if (!filename) {
+    throw new Error(`The file URL has no filename: ${fileUrl}`)
+  }
+
+  return filename
 }
 
 function getMimeType(response: Response, filename: string): string {
@@ -232,7 +155,7 @@ function getMimeType(response: Response, filename: string): string {
   return mimeType
 }
 
-async function downloadPhoto(photo: OldPhoto): Promise<{ file: File; filename: string }> {
+async function downloadPhoto(photo: ImportedPhoto): Promise<{ file: File; filename: string }> {
   const response = await fetch(photo.fileUrl)
 
   if (!response.ok) {
@@ -257,10 +180,26 @@ function normalizeFilename(filename: string): string {
   return decodeURIComponent(filename).toLowerCase()
 }
 
+function parseLimitArg(): number | undefined {
+  const flag = process.argv.find((arg) => arg.startsWith('--limit'))
+
+  if (!flag) return undefined
+
+  const raw = flag.includes('=') ? flag.split('=')[1] : process.argv[process.argv.indexOf(flag) + 1]
+  const limit = Number(raw)
+
+  if (!Number.isInteger(limit) || limit <= 0) {
+    throw new Error('--limit must be a positive integer, e.g. --limit 10 or --limit=10.')
+  }
+
+  return limit
+}
+
 async function importAlbums() {
   const dryRun = process.argv.includes('--dry-run')
   const force = process.argv.includes('--force')
-  const albums = await fetchAlbums()
+  const limit = parseLimitArg()
+  const albums = await fetchAlbums(limit)
 
   console.log(`Found ${albums.length} photo albums.`)
 

@@ -58,6 +58,7 @@ export const plugins: Plugin[] = [
     clientUploads: true,
     collections: {
       media: true,
+      audios: true,
     },
     token: process.env.BLOB_READ_WRITE_TOKEN,
   }),

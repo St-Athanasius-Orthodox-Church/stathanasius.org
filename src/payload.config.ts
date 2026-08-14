@@ -5,7 +5,10 @@ import { buildConfig, PayloadRequest } from 'payload'
 import { fileURLToPath } from 'url'
 
 import { Media } from './collections/Media'
+import { People } from './collections/People'
 import { PhotoAlbums } from './collections/PhotoAlbums'
+import { Audios } from './collections/Audios'
+import { Homilies } from './collections/Homilies'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
@@ -59,7 +62,7 @@ export default buildConfig({
       idleTimeoutMillis: 2000,
     },
   }),
-  collections: [Media, Users, PhotoAlbums],
+  collections: [Media, Users, People, PhotoAlbums, Audios, Homilies],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins,

@@ -69,7 +69,10 @@ export interface Config {
   collections: {
     media: Media;
     users: User;
+    people: Person;
     'photo-albums': PhotoAlbum;
+    audios: Audio;
+    homilies: Homily;
     forms: Form;
     'form-submissions': FormSubmission;
     'payload-kv': PayloadKv;
@@ -81,7 +84,10 @@ export interface Config {
   collectionsSelect: {
     media: MediaSelect<false> | MediaSelect<true>;
     users: UsersSelect<false> | UsersSelect<true>;
+    people: PeopleSelect<false> | PeopleSelect<true>;
     'photo-albums': PhotoAlbumsSelect<false> | PhotoAlbumsSelect<true>;
+    audios: AudiosSelect<false> | AudiosSelect<true>;
+    homilies: HomiliesSelect<false> | HomiliesSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -249,6 +255,40 @@ export interface User {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "people".
+ */
+export interface Person {
+  id: number;
+  name: string;
+  photo?: (number | null) | Media;
+  /**
+   * Role or position, e.g. "Pastor" or "Guest Preacher".
+   */
+  title?: string | null;
+  bio?: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  } | null;
+  /**
+   * Link to a CMS user account, if this person has one.
+   */
+  user?: (number | null) | User;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "photo-albums".
  */
 export interface PhotoAlbum {
@@ -257,6 +297,37 @@ export interface PhotoAlbum {
   date: string;
   coverPhoto?: (number | null) | Media;
   photos: (number | Media)[];
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audios".
+ */
+export interface Audio {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homilies".
+ */
+export interface Homily {
+  id: number;
+  title: string;
+  date: string;
+  speaker: number | Person;
+  audio: number | Audio;
   updatedAt: string;
   createdAt: string;
 }
@@ -484,8 +555,20 @@ export interface PayloadLockedDocument {
         value: number | User;
       } | null)
     | ({
+        relationTo: 'people';
+        value: number | Person;
+      } | null)
+    | ({
         relationTo: 'photo-albums';
         value: number | PhotoAlbum;
+      } | null)
+    | ({
+        relationTo: 'audios';
+        value: number | Audio;
+      } | null)
+    | ({
+        relationTo: 'homilies';
+        value: number | Homily;
       } | null)
     | ({
         relationTo: 'forms';
@@ -655,6 +738,19 @@ export interface UsersSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "people_select".
+ */
+export interface PeopleSelect<T extends boolean = true> {
+  name?: T;
+  photo?: T;
+  title?: T;
+  bio?: T;
+  user?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "photo-albums_select".
  */
 export interface PhotoAlbumsSelect<T extends boolean = true> {
@@ -662,6 +758,35 @@ export interface PhotoAlbumsSelect<T extends boolean = true> {
   date?: T;
   coverPhoto?: T;
   photos?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "audios_select".
+ */
+export interface AudiosSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "homilies_select".
+ */
+export interface HomiliesSelect<T extends boolean = true> {
+  title?: T;
+  date?: T;
+  speaker?: T;
+  audio?: T;
   updatedAt?: T;
   createdAt?: T;
 }
