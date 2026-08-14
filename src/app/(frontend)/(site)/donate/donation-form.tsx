@@ -1,89 +1,79 @@
 'use client'
 
-import { CircleCheckIcon } from 'lucide-react'
+import { CircleCheckIcon, CircleXIcon, ClockIcon, TriangleAlertIcon } from 'lucide-react'
 import { useState } from 'react'
 import type { FormEvent } from 'react'
 
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import {
-  Field,
-  FieldGroup,
-  FieldLabel,
-} from '@/components/ui/field'
+import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from '@/components/ui/native-select'
+import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
+import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
-
-const EARMARK_OPTIONS = [
-  'General Donation',
-  'Tithe',
-  'Temple Fund',
-  "Pastor's Fund",
-  'St. Athanasius Bookstore',
-  "Women's Fellowship Service Project",
-  'Agape Meal',
-  'Pre-marital Counseling',
-  'St. Brigid Fellowship',
-  'Retreat Registration',
-  '2026 CGS Formation Course',
-  '2025 Golf Tournament General Donation',
-  'Sponsor Fr Nicholas - Hole 10',
-  'Dn Richard - Putting Contest',
-  'Project Mexico Mission Team',
-] as const
-
-type EarmarkOption = (typeof EARMARK_OPTIONS)[number]
-
-function resolveEarmark(value: string | undefined): EarmarkOption {
-  if (value && EARMARK_OPTIONS.includes(value as EarmarkOption)) {
-    return value as EarmarkOption
-  }
-  return 'General Donation'
-}
+import {
+  DONATION_FREQUENCIES,
+  DONATION_FREQUENCY_LABELS,
+  DONATION_NOTES_MAX_LENGTH,
+  EARMARK_OPTIONS,
+  MAX_DONATION_CENTS,
+  MIN_DONATION_CENTS,
+  resolveEarmark,
+} from '@/lib/donation'
+import type { DonationCheckoutStatus } from '@/lib/stripe-checkout'
 
 type DonationFormProps = {
-  isSuccess?: boolean
+  checkoutStatus?: DonationCheckoutStatus | 'canceled'
   initialEarmark?: string
 }
 
-export function DonationForm({
-  isSuccess = false,
-  initialEarmark,
-}: DonationFormProps) {
+export function DonationForm({ checkoutStatus, initialEarmark }: DonationFormProps) {
   const [data, setData] = useState({
-    first_name: '',
-    last_name: '',
-    street_address: '',
-    city: '',
-    country: 'United States',
-    state: 'California',
-    zip: '',
-    email: '',
-    phone: '',
     amount: '',
+    frequency: 'one-time',
     earmark: resolveEarmark(initialEarmark),
     comments: '',
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [submissionError, setSubmissionError] = useState<string>()
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault()
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setIsSubmitting(true)
+    setSubmissionError(undefined)
+
+    try {
+      const response = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      })
+      const result: unknown = await response.json()
+
+      if (
+        !response.ok ||
+        typeof result !== 'object' ||
+        result === null ||
+        !('url' in result) ||
+        typeof result.url !== 'string'
+      ) {
+        throw new Error('Checkout Session creation failed.')
+      }
+
+      window.location.assign(result.url)
+    } catch {
+      setSubmissionError('Secure checkout could not be started. Please try again.')
+      setIsSubmitting(false)
+    }
   }
 
   function setField<K extends keyof typeof data>(key: K, value: (typeof data)[K]) {
-    setData((prev) => ({ ...prev, [key]: value }))
+    setData((previous) => ({ ...previous, [key]: value }))
   }
 
   return (
-    <Card
-      variant="orthodox"
-      goldBorderTop
-      className="w-full max-w-2xl gap-4 rounded-lg"
-    >
+    <Card variant="orthodox" goldBorderTop className="w-full max-w-lg mx-auto gap-4 rounded-lg">
       <CardHeader className="pb-0 text-center">
         <CardTitle className="font-cinzel text-2xl font-semibold text-byzantine-blue md:text-3xl">
           Make a Donation
@@ -91,165 +81,61 @@ export function DonationForm({
       </CardHeader>
 
       <CardContent>
-        {isSuccess && (
+        {checkoutStatus === 'successful' && (
           <Alert variant="success" className="mb-6">
             <CircleCheckIcon />
             <AlertTitle>Thank You for Your Donation!</AlertTitle>
             <AlertDescription>
-              Your generous gift has been received. May God bless you for your
-              support of St. Athanasius Orthodox Church.
+              Your payment was successful. May God bless you for your support of St. Athanasius
+              Orthodox Church.
+            </AlertDescription>
+          </Alert>
+        )}
+        {checkoutStatus === 'processing' && (
+          <Alert className="mb-6">
+            <ClockIcon />
+            <AlertTitle>Payment Still Processing</AlertTitle>
+            <AlertDescription>
+              Stripe is still processing your payment. Please check your email for confirmation.
+            </AlertDescription>
+          </Alert>
+        )}
+        {checkoutStatus === 'canceled' && (
+          <Alert className="mb-6">
+            <CircleXIcon />
+            <AlertTitle>Checkout Canceled</AlertTitle>
+            <AlertDescription>No payment was made. You can try again below.</AlertDescription>
+          </Alert>
+        )}
+        {checkoutStatus === 'unverified' && (
+          <Alert variant="destructive" className="mb-6">
+            <TriangleAlertIcon />
+            <AlertTitle>Unable to Verify Checkout</AlertTitle>
+            <AlertDescription>
+              We could not verify this checkout with Stripe. Please check your email or contact the
+              church office before trying again.
             </AlertDescription>
           </Alert>
         )}
 
         <div className="mb-6 space-y-4 text-center text-byzantine-blue/90">
           <p>
-            We thank you for considering a donation to St. Athanasius Orthodox
-            Church. Your generosity will help us continue and grow our many
-            worthy ministries - to the glorification of our Lord and Savior,
-            Jesus Christ.
+            We thank you for considering a donation to St. Athanasius Orthodox Church. Your
+            generosity will help us continue and grow our many worthy ministries - to the
+            glorification of our Lord and Savior, Jesus Christ.
           </p>
           <p>
-            To make a donation, please fill out the secure donation form below.
-            If you would like to make a donation by phone, please call our church
-            office at{' '}
-            <a
-              href="tel:805-685-5400"
-              className="font-medium text-orthodox-gold hover:underline"
-            >
+            To make a donation, please fill out the secure donation form below. If you would like to
+            make a donation by phone, please call our church office at{' '}
+            <a href="tel:805-685-5400" className="font-medium text-orthodox-gold hover:underline">
               805-685-5400
             </a>
             .
           </p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-8">
           <FieldGroup>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor="first_name" className="text-byzantine-blue">
-                  First Name
-                </FieldLabel>
-                <Input
-                  id="first_name"
-                  type="text"
-                  value={data.first_name}
-                  onChange={(e) => setField('first_name', e.target.value)}
-                  required
-                />
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="last_name" className="text-byzantine-blue">
-                  Last Name
-                </FieldLabel>
-                <Input
-                  id="last_name"
-                  type="text"
-                  value={data.last_name}
-                  onChange={(e) => setField('last_name', e.target.value)}
-                  required
-                />
-              </Field>
-            </div>
-
-            <Field>
-              <FieldLabel htmlFor="street_address" className="text-byzantine-blue">
-                Street Address
-              </FieldLabel>
-              <Input
-                id="street_address"
-                type="text"
-                value={data.street_address}
-                onChange={(e) => setField('street_address', e.target.value)}
-                required
-              />
-            </Field>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor="city" className="text-byzantine-blue">
-                  City
-                </FieldLabel>
-                <Input
-                  id="city"
-                  type="text"
-                  value={data.city}
-                  onChange={(e) => setField('city', e.target.value)}
-                  required
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="state" className="text-byzantine-blue">
-                  State
-                </FieldLabel>
-                <Input
-                  id="state"
-                  type="text"
-                  value={data.state}
-                  onChange={(e) => setField('state', e.target.value)}
-                  required
-                />
-              </Field>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor="zip" className="text-byzantine-blue">
-                  ZIP/Postal Code
-                </FieldLabel>
-                <Input
-                  id="zip"
-                  type="text"
-                  value={data.zip}
-                  onChange={(e) => setField('zip', e.target.value)}
-                  required
-                />
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="country" className="text-byzantine-blue">
-                  Country
-                </FieldLabel>
-                <Input
-                  id="country"
-                  type="text"
-                  value={data.country}
-                  onChange={(e) => setField('country', e.target.value)}
-                  required
-                />
-              </Field>
-            </div>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor="email" className="text-byzantine-blue">
-                  E-mail Address
-                </FieldLabel>
-                <Input
-                  id="email"
-                  type="email"
-                  value={data.email}
-                  onChange={(e) => setField('email', e.target.value)}
-                  autoComplete="email"
-                  required
-                />
-              </Field>
-
-              <Field>
-                <FieldLabel htmlFor="phone" className="text-byzantine-blue">
-                  Phone Number
-                </FieldLabel>
-                <Input
-                  id="phone"
-                  type="tel"
-                  value={data.phone}
-                  onChange={(e) => setField('phone', e.target.value)}
-                  autoComplete="tel"
-                  required
-                />
-              </Field>
-            </div>
-
             <div className="grid gap-4 sm:grid-cols-2">
               <Field>
                 <FieldLabel htmlFor="amount" className="text-byzantine-blue">
@@ -258,32 +144,31 @@ export function DonationForm({
                 <Input
                   id="amount"
                   type="number"
-                  min="1"
+                  min={MIN_DONATION_CENTS / 100}
+                  max={MAX_DONATION_CENTS / 100}
                   step="0.01"
                   value={data.amount}
-                  onChange={(e) => setField('amount', e.target.value)}
+                  onChange={(event) => setField('amount', event.target.value)}
                   placeholder="$0.00"
                   required
                 />
               </Field>
 
               <Field>
-                <FieldLabel htmlFor="earmark" className="text-byzantine-blue">
-                  Earmark
+                <FieldLabel htmlFor="frequency" className="text-byzantine-blue">
+                  Frequency
                 </FieldLabel>
                 <NativeSelect
-                  id="earmark"
-                  value={data.earmark}
-                  onChange={(e) =>
-                    setField('earmark', resolveEarmark(e.target.value))
-                  }
+                  id="frequency"
+                  value={data.frequency}
+                  onChange={(event) => setField('frequency', event.target.value)}
                   required
                   wrapperClassName="w-full"
                   className="w-full"
                 >
-                  {EARMARK_OPTIONS.map((option) => (
-                    <NativeSelectOption key={option} value={option}>
-                      {option}
+                  {DONATION_FREQUENCIES.map((frequency) => (
+                    <NativeSelectOption key={frequency} value={frequency}>
+                      {DONATION_FREQUENCY_LABELS[frequency]}
                     </NativeSelectOption>
                   ))}
                 </NativeSelect>
@@ -291,25 +176,55 @@ export function DonationForm({
             </div>
 
             <Field>
+              <FieldLabel htmlFor="earmark" className="text-byzantine-blue">
+                Earmark
+              </FieldLabel>
+              <NativeSelect
+                id="earmark"
+                value={data.earmark}
+                onChange={(event) => setField('earmark', resolveEarmark(event.target.value))}
+                required
+                wrapperClassName="w-full"
+                className="w-full"
+              >
+                {EARMARK_OPTIONS.map((option) => (
+                  <NativeSelectOption key={option} value={option}>
+                    {option}
+                  </NativeSelectOption>
+                ))}
+              </NativeSelect>
+            </Field>
+
+            <Field>
               <FieldLabel htmlFor="comments" className="text-byzantine-blue">
-                Comments & Notes{' '}
-                <span className="text-muted-foreground">(optional)</span>
+                Comments & Notes <span className="text-muted-foreground">(optional)</span>
               </FieldLabel>
               <Textarea
                 id="comments"
                 value={data.comments}
-                onChange={(e) => setField('comments', e.target.value)}
+                onChange={(event) => setField('comments', event.target.value)}
+                maxLength={DONATION_NOTES_MAX_LENGTH}
                 rows={4}
               />
             </Field>
+
+            {submissionError && (
+              <Alert variant="destructive">
+                <TriangleAlertIcon />
+                <AlertTitle>Unable to Continue</AlertTitle>
+                <AlertDescription>{submissionError}</AlertDescription>
+              </Alert>
+            )}
 
             <Button
               type="submit"
               variant="byzantineGold"
               size="lg"
               className="w-full"
+              disabled={isSubmitting}
             >
-              Submit Donation
+              {isSubmitting && <Spinner />}
+              {isSubmitting ? 'Opening secure checkout...' : 'Continue to secure checkout'}
             </Button>
           </FieldGroup>
         </form>
