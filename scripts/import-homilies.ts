@@ -8,7 +8,10 @@ import type { File } from 'payload'
 import { z } from 'zod'
 import type { Audio, Homily, Person } from '@/payload-types'
 
+import { mapWithConcurrency } from './lib/map-with-concurrency'
+
 const DEFAULT_API_URL = 'https://www.stathanasius.org/homilies.json'
+const DEFAULT_WORKER_COUNT = 10
 const API_URL = process.env.OLD_HOMILIES_API_URL || DEFAULT_API_URL
 
 const homilySchema = z.object({
@@ -68,7 +71,9 @@ function parseJson<T>(schema: z.ZodType<T>, value: unknown, description: string)
   const result = schema.safeParse(value)
 
   if (!result.success) {
-    throw new Error(`The API returned invalid data for ${description}:\n${z.prettifyError(result.error)}`)
+    throw new Error(
+      `The API returned invalid data for ${description}:\n${z.prettifyError(result.error)}`,
+    )
   }
 
   return result.data
@@ -200,10 +205,26 @@ function parseLimitArg(): number | undefined {
   return limit
 }
 
+function parseWorkerArg(): number {
+  const flag = process.argv.find((arg) => arg.startsWith('--worker'))
+
+  if (!flag) return DEFAULT_WORKER_COUNT
+
+  const raw = flag.includes('=') ? flag.split('=')[1] : process.argv[process.argv.indexOf(flag) + 1]
+  const workers = Number(raw)
+
+  if (!Number.isInteger(workers) || workers <= 0) {
+    throw new Error('--worker must be a positive integer, e.g. --worker 10 or --worker=10.')
+  }
+
+  return workers
+}
+
 async function importHomilies() {
   const dryRun = process.argv.includes('--dry-run')
   const force = process.argv.includes('--force')
   const limit = parseLimitArg()
+  const workers = parseWorkerArg()
   const homilies = await fetchHomilies(limit)
 
   console.log(`Found ${homilies.length} homilies.`)
@@ -282,61 +303,87 @@ async function importHomilies() {
   }
 
   const uploadedByUrl = new Map<string, UploadedAudio>()
+  const inFlightUploads = new Map<string, Promise<UploadedAudio>>()
+  const inFlightPeople = new Map<string, Promise<Person>>()
 
   try {
-    for (const [homilyIndex, homily] of homilies.entries()) {
+    await mapWithConcurrency(homilies, workers, async (homily, homilyIndex) => {
       const homilyProgress = `[Homily ${homilyIndex + 1}/${homilies.length}]`
       const homilyKey = getHomilyKey(homily)
 
       if (!force && existingKeys.has(homilyKey)) {
         console.log(`${homilyProgress} Skipping existing homily "${homily.title}".`)
-        continue
+        return
       }
 
       if (!homily.audioUrl) {
         console.warn(`${homilyProgress} Skipping "${homily.title}": no audio URL.`)
-        continue
+        return
       }
 
       let person = peopleByName.get(homily.canonicalSpeaker)
 
       if (!person) {
-        person = await payload.create({
-          collection: 'people',
-          data: { name: homily.canonicalSpeaker },
-          overrideAccess: true,
-        })
-        peopleByName.set(homily.canonicalSpeaker, person)
-        console.log(`${homilyProgress} Created speaker "${homily.canonicalSpeaker}".`)
+        let inFlight = inFlightPeople.get(homily.canonicalSpeaker)
+
+        if (!inFlight) {
+          inFlight = payload
+            .create({
+              collection: 'people',
+              data: { name: homily.canonicalSpeaker },
+              overrideAccess: true,
+            })
+            .then((created) => {
+              peopleByName.set(homily.canonicalSpeaker, created)
+              console.log(`${homilyProgress} Created speaker "${homily.canonicalSpeaker}".`)
+              return created
+            })
+
+          inFlightPeople.set(homily.canonicalSpeaker, inFlight)
+        }
+
+        person = await inFlight
       }
 
-      const filename = getFilename(homily.audioUrl)
-      let uploaded = uploadedByUrl.get(homily.audioUrl)
+      const audioUrl = homily.audioUrl
+      const filename = getFilename(audioUrl)
+      let uploaded = uploadedByUrl.get(audioUrl)
 
       if (!uploaded) {
-        uploaded = existingAudiosByFilename.get(normalizeFilename(filename))
+        let inFlight = inFlightUploads.get(audioUrl)
 
-        if (uploaded) {
-          uploadedByUrl.set(homily.audioUrl, uploaded)
-          console.log(`${homilyProgress} Reusing ${uploaded.filename}.`)
-        } else {
-          console.log(`${homilyProgress} Downloading ${filename}.`)
-          const downloaded = await downloadAudio(homily.audioUrl)
-          const audio = await payload.create({
-            collection: 'audios',
-            data: {},
-            file: downloaded.file,
-            overrideAccess: true,
-          })
+        if (!inFlight) {
+          inFlight = (async () => {
+            const existing = existingAudiosByFilename.get(normalizeFilename(filename))
 
-          uploaded = {
-            id: audio.id,
-            filename: downloaded.filename,
-          }
-          uploadedByUrl.set(homily.audioUrl, uploaded)
-          existingAudiosByFilename.set(normalizeFilename(filename), uploaded)
-          console.log(`${homilyProgress} Uploaded ${downloaded.filename}.`)
+            if (existing) {
+              console.log(`${homilyProgress} Reusing ${existing.filename}.`)
+              return existing
+            }
+
+            console.log(`${homilyProgress} Downloading ${filename}.`)
+            const downloaded = await downloadAudio(audioUrl)
+            const audio = await payload.create({
+              collection: 'audios',
+              data: {},
+              file: downloaded.file,
+              overrideAccess: true,
+            })
+
+            const result = {
+              id: audio.id,
+              filename: downloaded.filename,
+            }
+            existingAudiosByFilename.set(normalizeFilename(filename), result)
+            console.log(`${homilyProgress} Uploaded ${downloaded.filename}.`)
+            return result
+          })()
+
+          inFlightUploads.set(audioUrl, inFlight)
         }
+
+        uploaded = await inFlight
+        uploadedByUrl.set(audioUrl, uploaded)
       } else {
         console.log(`${homilyProgress} Reusing ${uploaded.filename}.`)
       }
@@ -354,7 +401,7 @@ async function importHomilies() {
 
       existingKeys.add(homilyKey)
       console.log(`${homilyProgress} Imported "${createdHomily.title}".`)
-    }
+    })
   } finally {
     await payload.destroy()
   }

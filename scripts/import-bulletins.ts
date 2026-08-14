@@ -8,7 +8,10 @@ import type { File } from 'payload'
 import { z } from 'zod'
 import type { Bulletin, File as FileDocument } from '@/payload-types'
 
+import { mapWithConcurrency } from './lib/map-with-concurrency'
+
 const DEFAULT_API_URL = 'https://stathanasius.org/bulletins.json'
+const DEFAULT_WORKER_COUNT = 10
 const API_URL = process.env.OLD_BULLETINS_API_URL || DEFAULT_API_URL
 
 const bulletinSchema = z.object({
@@ -41,7 +44,9 @@ function parseJson<T>(schema: z.ZodType<T>, value: unknown, description: string)
   const result = schema.safeParse(value)
 
   if (!result.success) {
-    throw new Error(`The API returned invalid data for ${description}:\n${z.prettifyError(result.error)}`)
+    throw new Error(
+      `The API returned invalid data for ${description}:\n${z.prettifyError(result.error)}`,
+    )
   }
 
   return result.data
@@ -138,10 +143,26 @@ function parseLimitArg(): number | undefined {
   return limit
 }
 
+function parseWorkerArg(): number {
+  const flag = process.argv.find((arg) => arg.startsWith('--worker'))
+
+  if (!flag) return DEFAULT_WORKER_COUNT
+
+  const raw = flag.includes('=') ? flag.split('=')[1] : process.argv[process.argv.indexOf(flag) + 1]
+  const workers = Number(raw)
+
+  if (!Number.isInteger(workers) || workers <= 0) {
+    throw new Error('--worker must be a positive integer, e.g. --worker 10 or --worker=10.')
+  }
+
+  return workers
+}
+
 async function importBulletins() {
   const dryRun = process.argv.includes('--dry-run')
   const force = process.argv.includes('--force')
   const limit = parseLimitArg()
+  const workers = parseWorkerArg()
   const bulletins = await fetchBulletins(limit)
 
   console.log(`Found ${bulletins.length} bulletins.`)
@@ -190,45 +211,57 @@ async function importBulletins() {
   }
 
   const uploadedByUrl = new Map<string, UploadedFile>()
+  const inFlightUploads = new Map<string, Promise<UploadedFile>>()
 
   try {
-    for (const [bulletinIndex, bulletin] of bulletins.entries()) {
+    await mapWithConcurrency(bulletins, workers, async (bulletin, bulletinIndex) => {
       const bulletinProgress = `[Bulletin ${bulletinIndex + 1}/${bulletins.length}]`
       const filename = getFilename(bulletin.pdfUrl)
       const bulletinDate = bulletin.date.slice(0, 10)
 
       if (!force && existingDates.has(bulletinDate)) {
         console.log(`${bulletinProgress} Skipping existing bulletin for ${bulletinDate}.`)
-        continue
+        return
       }
 
       console.log(`${bulletinProgress} Importing bulletin for ${bulletinDate}.`)
       let uploaded = uploadedByUrl.get(bulletin.pdfUrl)
 
       if (!uploaded) {
-        uploaded = existingFilesByFilename.get(normalizeFilename(filename))
+        let inFlight = inFlightUploads.get(bulletin.pdfUrl)
 
-        if (uploaded) {
-          uploadedByUrl.set(bulletin.pdfUrl, uploaded)
-          console.log(`${bulletinProgress} Reusing ${uploaded.filename}.`)
-        } else {
-          console.log(`${bulletinProgress} Downloading ${filename}.`)
-          const downloaded = await downloadFile(bulletin.pdfUrl)
-          const file = await payload.create({
-            collection: 'files',
-            data: {},
-            file: downloaded.file,
-            overrideAccess: true,
-          })
+        if (!inFlight) {
+          inFlight = (async () => {
+            const existing = existingFilesByFilename.get(normalizeFilename(filename))
 
-          uploaded = {
-            id: file.id,
-            filename: downloaded.filename,
-          }
-          uploadedByUrl.set(bulletin.pdfUrl, uploaded)
-          existingFilesByFilename.set(normalizeFilename(filename), uploaded)
-          console.log(`${bulletinProgress} Uploaded ${downloaded.filename}.`)
+            if (existing) {
+              console.log(`${bulletinProgress} Reusing ${existing.filename}.`)
+              return existing
+            }
+
+            console.log(`${bulletinProgress} Downloading ${filename}.`)
+            const downloaded = await downloadFile(bulletin.pdfUrl)
+            const file = await payload.create({
+              collection: 'files',
+              data: {},
+              file: downloaded.file,
+              overrideAccess: true,
+            })
+
+            const result = {
+              id: file.id,
+              filename: downloaded.filename,
+            }
+            existingFilesByFilename.set(normalizeFilename(filename), result)
+            console.log(`${bulletinProgress} Uploaded ${downloaded.filename}.`)
+            return result
+          })()
+
+          inFlightUploads.set(bulletin.pdfUrl, inFlight)
         }
+
+        uploaded = await inFlight
+        uploadedByUrl.set(bulletin.pdfUrl, uploaded)
       } else {
         console.log(`${bulletinProgress} Reusing ${uploaded.filename}.`)
       }
@@ -244,7 +277,7 @@ async function importBulletins() {
 
       existingDates.add(bulletinDate)
       console.log(`${bulletinProgress} Imported bulletin for ${createdBulletin.date}.`)
-    }
+    })
   } finally {
     await payload.destroy()
   }

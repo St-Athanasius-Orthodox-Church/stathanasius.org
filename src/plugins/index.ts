@@ -56,6 +56,7 @@ export const plugins: Plugin[] = [
   vercelBlobStorage({
     enabled: process.env.NODE_ENV !== 'development' && !!process.env.BLOB_READ_WRITE_TOKEN,
     clientUploads: true,
+    addRandomSuffix: true,
     collections: {
       media: true,
       audios: true,
