@@ -61,6 +61,7 @@
     "react-hook-form": "7.71.1",
     "sharp": "0.34.2",
     "sonner": "^2.0.7",
+    "stripe": "^22.5.0",
     "tailwind-merge": "^3.4.0",
     "zod": "^4.4.3"
   },
