@@ -8,6 +8,8 @@ import { Media } from './collections/Media'
 import { People } from './collections/People'
 import { PhotoAlbums } from './collections/PhotoAlbums'
 import { Audios } from './collections/Audios'
+import { Files } from './collections/Files'
+import { Bulletins } from './collections/Bulletins'
 import { Homilies } from './collections/Homilies'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
@@ -62,7 +64,7 @@ export default buildConfig({
       idleTimeoutMillis: 2000,
     },
   }),
-  collections: [Media, Users, People, PhotoAlbums, Audios, Homilies],
+  collections: [Media, Users, People, PhotoAlbums, Audios, Homilies, Files, Bulletins],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins,

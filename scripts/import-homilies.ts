@@ -182,7 +182,7 @@ function normalizeFilename(filename: string): string {
 }
 
 function getHomilyKey(homily: ImportedHomily): string {
-  return `${homily.canonicalSpeaker}\u0000${homily.date}\u0000${homily.title}`
+  return `${homily.canonicalSpeaker}\u0000${homily.date.slice(0, 10)}\u0000${homily.title}`
 }
 
 function parseLimitArg(): number | undefined {
@@ -241,7 +241,7 @@ async function importHomilies() {
   const existingKeys = new Set(
     existingDocs.map((homily) => {
       const speaker = typeof homily.speaker === 'object' ? (homily.speaker?.name ?? '') : ''
-      return `${speaker}\u0000${new Date(homily.date).toISOString()}\u0000${homily.title}`
+      return `${speaker}\u0000${new Date(homily.date).toISOString().slice(0, 10)}\u0000${homily.title}`
     }),
   )
   const existingPeople = await payload.find({
@@ -345,7 +345,7 @@ async function importHomilies() {
         collection: 'homilies',
         data: {
           title: homily.title,
-          date: homily.date,
+          date: new Date(`${homily.date.slice(0, 10)}T12:00:00.000Z`).toISOString(),
           speaker: person.id,
           audio: uploaded.id,
         },

@@ -31,6 +31,11 @@ export const PhotoAlbums: CollectionConfig<'photo-albums'> = {
       name: 'date',
       type: 'date',
       required: true,
+      admin: {
+        date: {
+          displayFormat: 'MM/dd/yyyy',
+        },
+      },
     },
     {
       name: 'coverPhoto',

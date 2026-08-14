@@ -73,6 +73,8 @@ export interface Config {
     'photo-albums': PhotoAlbum;
     audios: Audio;
     homilies: Homily;
+    files: File;
+    bulletins: Bulletin;
     forms: Form;
     'form-submissions': FormSubmission;
     'payload-kv': PayloadKv;
@@ -88,6 +90,8 @@ export interface Config {
     'photo-albums': PhotoAlbumsSelect<false> | PhotoAlbumsSelect<true>;
     audios: AudiosSelect<false> | AudiosSelect<true>;
     homilies: HomiliesSelect<false> | HomiliesSelect<true>;
+    files: FilesSelect<false> | FilesSelect<true>;
+    bulletins: BulletinsSelect<false> | BulletinsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -333,6 +337,35 @@ export interface Homily {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "files".
+ */
+export interface File {
+  id: number;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulletins".
+ */
+export interface Bulletin {
+  id: number;
+  date: string;
+  file: number | File;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "forms".
  */
 export interface Form {
@@ -571,6 +604,14 @@ export interface PayloadLockedDocument {
         value: number | Homily;
       } | null)
     | ({
+        relationTo: 'files';
+        value: number | File;
+      } | null)
+    | ({
+        relationTo: 'bulletins';
+        value: number | Bulletin;
+      } | null)
+    | ({
         relationTo: 'forms';
         value: number | Form;
       } | null)
@@ -787,6 +828,33 @@ export interface HomiliesSelect<T extends boolean = true> {
   date?: T;
   speaker?: T;
   audio?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "files_select".
+ */
+export interface FilesSelect<T extends boolean = true> {
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "bulletins_select".
+ */
+export interface BulletinsSelect<T extends boolean = true> {
+  date?: T;
+  file?: T;
   updatedAt?: T;
   createdAt?: T;
 }

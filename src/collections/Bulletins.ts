@@ -3,8 +3,8 @@ import type { CollectionConfig } from 'payload'
 import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
 
-export const Homilies: CollectionConfig = {
-  slug: 'homilies',
+export const Bulletins: CollectionConfig = {
+  slug: 'bulletins',
   access: {
     create: authenticated,
     delete: authenticated,
@@ -12,16 +12,10 @@ export const Homilies: CollectionConfig = {
     update: authenticated,
   },
   admin: {
-    defaultColumns: ['title', 'date', 'speaker', 'updatedAt'],
-    useAsTitle: 'title',
+    defaultColumns: ['date', 'updatedAt'],
   },
   defaultSort: '-date',
   fields: [
-    {
-      name: 'title',
-      type: 'text',
-      required: true,
-    },
     {
       name: 'date',
       type: 'date',
@@ -33,15 +27,9 @@ export const Homilies: CollectionConfig = {
       },
     },
     {
-      name: 'speaker',
-      type: 'relationship',
-      relationTo: 'people',
-      required: true,
-    },
-    {
-      name: 'audio',
+      name: 'file',
       type: 'upload',
-      relationTo: 'audios',
+      relationTo: 'files',
       required: true,
     },
   ],

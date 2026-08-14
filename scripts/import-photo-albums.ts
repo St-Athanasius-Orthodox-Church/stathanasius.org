@@ -232,7 +232,7 @@ async function importAlbums() {
     ? existingAlbums
     : existingAlbums.docs
   const existingKeys = new Set(
-    existingDocs.map((album) => `${album.title}\u0000${new Date(album.date).toISOString()}`),
+    existingDocs.map((album) => `${album.title}\u0000${new Date(album.date).toISOString().slice(0, 10)}`),
   )
   const existingMedia = await payload.find({
     collection: 'media',
@@ -259,7 +259,7 @@ async function importAlbums() {
   try {
     for (const [albumIndex, album] of albums.entries()) {
       const albumProgress = `[Album ${albumIndex + 1}/${albums.length}]`
-      const albumKey = `${album.title}\u0000${album.date}`
+      const albumKey = `${album.title}\u0000${album.date.slice(0, 10)}`
       if (!force && existingKeys.has(albumKey)) {
         console.log(`${albumProgress} Skipping existing album "${album.title}".`)
         continue
@@ -321,7 +321,7 @@ async function importAlbums() {
         collection: 'photo-albums',
         data: {
           title: album.title,
-          date: album.date,
+          date: new Date(`${album.date.slice(0, 10)}T12:00:00.000Z`).toISOString(),
           photos: uploadedPhotos.map((photo) => photo.id),
           ...(coverPhoto ? { coverPhoto: coverPhoto.id } : {}),
         },
