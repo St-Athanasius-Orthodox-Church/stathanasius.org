@@ -1,39 +1,36 @@
 const heroUrl = '/assets/hero.jpg'
-import type * as React from "react"
+import type * as React from 'react'
 
-import { GoldSeparator } from "@/components/ui/gold-separator"
-import { cn } from "@/lib/utils"
+import { GoldSeparator } from '@/components/ui/gold-separator'
+import { cn } from '@/lib/utils'
 
 const sizeClasses = {
-  full: "h-[600px] md:h-[700px]",
-  medium: "h-[200px] md:h-[250px]",
-  fullPage: "min-h-[calc(100vh-200px)] py-16",
+  full: 'h-[600px] md:h-[700px]',
+  medium: 'h-[200px] md:h-[250px]',
+  fullPage: 'min-h-[calc(100vh-200px)] py-16',
 }
 
 const gradientStyles = {
-  light:
-    "linear-gradient(to bottom, rgba(30, 58, 95, 0.5), rgba(30, 58, 95, 0.7))",
-  normal:
-    "linear-gradient(to bottom, rgba(30, 58, 95, 0.6), rgba(30, 58, 95, 0.8))",
-  strong:
-    "linear-gradient(to bottom, rgba(30, 58, 95, 0.7), rgba(30, 58, 95, 0.85))",
+  light: 'linear-gradient(to bottom, rgba(30, 58, 95, 0.5), rgba(30, 58, 95, 0.7))',
+  normal: 'linear-gradient(to bottom, rgba(30, 58, 95, 0.6), rgba(30, 58, 95, 0.8))',
+  strong: 'linear-gradient(to bottom, rgba(30, 58, 95, 0.7), rgba(30, 58, 95, 0.85))',
 }
 
 const titleSizeClasses = {
-  full: "text-4xl md:text-6xl lg:text-7xl",
-  medium: "text-4xl md:text-5xl lg:text-6xl",
-  fullPage: "text-4xl md:text-5xl lg:text-6xl",
+  full: 'text-4xl md:text-6xl lg:text-7xl',
+  medium: 'text-4xl md:text-5xl lg:text-6xl',
+  fullPage: 'text-4xl md:text-5xl lg:text-6xl',
 }
 
 const subtitleSizeClasses = {
-  full: "text-2xl md:text-2xl lg:text-4xl",
-  medium: "mt-4 text-xl md:text-2xl",
-  fullPage: "mt-4 text-xl md:text-2xl",
+  full: 'text-2xl md:text-2xl lg:text-4xl',
+  medium: 'mt-4 text-xl md:text-2xl',
+  fullPage: 'mt-4 text-xl md:text-2xl',
 }
 
 type HeroProps = {
   /** Size preset for the hero section */
-  size?: "full" | "medium" | "fullPage"
+  size?: 'full' | 'medium' | 'fullPage'
   /** Title text (for structured content mode) */
   title?: string
   /** Subtitle text (for structured content mode) */
@@ -43,7 +40,7 @@ type HeroProps = {
   /** Custom content (for custom content mode, e.g. forms) */
   children?: React.ReactNode
   /** Gradient overlay intensity */
-  gradientIntensity?: "light" | "normal" | "strong"
+  gradientIntensity?: 'light' | 'normal' | 'strong'
   /** Background image URL */
   backgroundImage?: string
   /** Whether to show the gold separator at the bottom */
@@ -53,12 +50,12 @@ type HeroProps = {
 }
 
 function Hero({
-  size = "medium",
+  size = 'medium',
   title,
   subtitle,
   actions,
   children,
-  gradientIntensity = "normal",
+  gradientIntensity = 'normal',
   backgroundImage = heroUrl,
   showBottomBorder = true,
   className,
@@ -68,7 +65,7 @@ function Hero({
   return (
     <section
       className={cn(
-        "relative flex flex-col items-center justify-center overflow-hidden",
+        'relative flex flex-col items-center justify-center overflow-hidden',
         sizeClasses[size],
         className,
       )}
@@ -92,7 +89,7 @@ function Hero({
           {title && (
             <h1
               className={cn(
-                "font-cinzel font-semibold text-white drop-shadow-lg",
+                'font-cinzel font-semibold text-white drop-shadow-lg',
                 titleSizeClasses[size],
               )}
             >
@@ -102,7 +99,7 @@ function Hero({
           {subtitle && (
             <p
               className={cn(
-                "mx-auto max-w-3xl leading-relaxed text-gray-100",
+                'mx-auto max-w-3xl leading-relaxed text-gray-100',
                 subtitleSizeClasses[size],
               )}
             >
@@ -110,21 +107,15 @@ function Hero({
             </p>
           )}
           {actions && (
-            <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">
-              {actions}
-            </div>
+            <div className="mt-12 flex flex-col justify-center gap-4 sm:flex-row">{actions}</div>
           )}
         </div>
       ) : children ? (
-        <div className="z-10 w-full max-w-md px-4">
-          {children}
-        </div>
+        <div className="z-10 w-full max-w-md px-4">{children}</div>
       ) : null}
 
       {/* Decorative bottom border */}
-      {showBottomBorder && (
-        <GoldSeparator className="absolute right-0 bottom-0 left-0" />
-      )}
+      {showBottomBorder && <GoldSeparator className="absolute right-0 bottom-0 left-0" />}
     </section>
   )
 }

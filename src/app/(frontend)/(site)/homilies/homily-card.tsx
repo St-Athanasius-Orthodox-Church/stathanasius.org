@@ -1,7 +1,6 @@
 import { DownloadIcon } from 'lucide-react'
 import Image from 'next/image'
 
-import { Button } from '@/components/ui/button'
 import { formatHomilyDate, type Homily } from '@/lib/homilies'
 
 export function HomilyCard({ homily }: { homily: Homily }) {
@@ -45,7 +44,7 @@ export function HomilyCard({ homily }: { homily: Homily }) {
       </div>
 
       <div className="min-w-0 flex-1">
-        <h2 className="font-cinzel text-base font-semibold text-byzantine-blue md:text-lg">
+        <h2 className="font-crimson-pro text-lg font-semibold text-byzantine-blue md:text-xl">
           {homily.title}
         </h2>
         <p className="text-sm font-medium text-orthodox-gold md:text-base">{homily.speaker}</p>
@@ -65,12 +64,14 @@ export function HomilyCard({ homily }: { homily: Homily }) {
             <source src={homily.audio_url} type="audio/mpeg" />
             Your browser does not support the audio element.
           </audio>
-          <Button asChild size="sm" variant="outline" className="mt-2 w-full md:w-auto">
-            <a href={homily.audio_download_url ?? homily.audio_url} download>
-              <DownloadIcon />
-              Download
-            </a>
-          </Button>
+          <a
+            href={homily.audio_download_url ?? homily.audio_url}
+            download
+            className="mt-2 inline-flex h-8 w-full items-center justify-center gap-1.5 rounded-md border bg-background px-3 py-1.5 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring md:w-auto"
+          >
+            <DownloadIcon />
+            Download
+          </a>
         </div>
       ) : null}
     </article>
