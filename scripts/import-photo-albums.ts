@@ -291,57 +291,69 @@ async function importAlbums() {
 
       console.log(`${albumProgress} Importing "${album.title}".`)
 
-      const uploadedPhotos = await mapWithConcurrency(
-        album.photos,
-        workers,
-        async (photo, photoIndex) => {
-          const photoProgress = `${albumProgress} [Photo ${photoIndex + 1}/${album.photos.length}]`
-          const filename = getFilename(photo.fileUrl)
-          let uploaded = uploadedByUrl.get(photo.fileUrl)
+      const albumFailures: { filename: string; reason: string }[] = []
+      const uploadedPhotos = (
+        await mapWithConcurrency(
+          album.photos,
+          workers,
+          async (photo, photoIndex) => {
+            const photoProgress = `${albumProgress} [Photo ${photoIndex + 1}/${album.photos.length}]`
+            const filename = getFilename(photo.fileUrl)
 
-          if (!uploaded) {
-            let inFlight = inFlightUploads.get(photo.fileUrl)
+            try {
+              let uploaded = uploadedByUrl.get(photo.fileUrl)
 
-            if (!inFlight) {
-              inFlight = (async () => {
-                const existing = existingMediaByFilename.get(normalizeFilename(filename))
+              if (!uploaded) {
+                let inFlight = inFlightUploads.get(photo.fileUrl)
 
-                if (existing) {
-                  console.log(`${photoProgress} Reusing ${existing.filename}.`)
-                  return existing
+                if (!inFlight) {
+                  inFlight = (async () => {
+                    const existing = existingMediaByFilename.get(normalizeFilename(filename))
+
+                    if (existing) {
+                      console.log(`${photoProgress} Reusing ${existing.filename}.`)
+                      return existing
+                    }
+
+                    console.log(`${photoProgress} Downloading ${filename}.`)
+                    const downloaded = await downloadPhoto(photo)
+                    const media = await payload.create({
+                      collection: 'media',
+                      data: { alt: downloaded.filename },
+                      file: downloaded.file,
+                      overrideAccess: true,
+                    })
+
+                    const result = {
+                      id: media.id,
+                      filename: downloaded.filename,
+                    }
+                    existingMediaByFilename.set(normalizeFilename(filename), result)
+                    console.log(`${photoProgress} Uploaded ${downloaded.filename}.`)
+                    return result
+                  })()
+
+                  inFlightUploads.set(photo.fileUrl, inFlight)
                 }
 
-                console.log(`${photoProgress} Downloading ${filename}.`)
-                const downloaded = await downloadPhoto(photo)
-                const media = await payload.create({
-                  collection: 'media',
-                  data: { alt: downloaded.filename },
-                  file: downloaded.file,
-                  overrideAccess: true,
-                })
+                uploaded = await inFlight
+                uploadedByUrl.set(photo.fileUrl, uploaded)
+              } else {
+                console.log(`${photoProgress} Reusing ${uploaded.filename}.`)
+              }
 
-                const result = {
-                  id: media.id,
-                  filename: downloaded.filename,
-                }
-                existingMediaByFilename.set(normalizeFilename(filename), result)
-                console.log(`${photoProgress} Uploaded ${downloaded.filename}.`)
-                return result
-              })()
-
-              inFlightUploads.set(photo.fileUrl, inFlight)
+              console.log(`${photoProgress} Complete.`)
+              return uploaded
+            } catch (error) {
+              inFlightUploads.delete(photo.fileUrl)
+              const reason = error instanceof Error ? error.message : String(error)
+              albumFailures.push({ filename, reason })
+              console.warn(`${photoProgress} Skipping ${filename}: ${reason}`)
+              return undefined
             }
-
-            uploaded = await inFlight
-            uploadedByUrl.set(photo.fileUrl, uploaded)
-          } else {
-            console.log(`${photoProgress} Reusing ${uploaded.filename}.`)
-          }
-
-          console.log(`${photoProgress} Complete.`)
-          return uploaded
-        },
-      )
+          },
+        )
+      ).filter((photo): photo is UploadedPhoto => photo !== undefined)
 
       const coverPhoto = album.coverUrl
         ? uploadedByUrl.get(album.coverUrl) ||
@@ -353,6 +365,13 @@ async function importAlbums() {
 
       if (album.coverUrl && !coverPhoto) {
         console.warn(`No uploaded photo matches the cover filename for "${album.title}".`)
+      }
+
+      if (uploadedPhotos.length === 0) {
+        console.warn(
+          `${albumProgress} Skipping album "${album.title}": all ${album.photos.length} photos failed to import.`,
+        )
+        continue
       }
 
       const createdAlbum = await payload.create({
@@ -368,8 +387,13 @@ async function importAlbums() {
       })
 
       existingKeys.add(albumKey)
+      if (albumFailures.length > 0) {
+        console.warn(
+          `${albumProgress} Skipped ${albumFailures.length} photo(s): ${albumFailures.map((failure) => failure.filename).join(', ')}`,
+        )
+      }
       console.log(
-        `${albumProgress} Imported "${createdAlbum.title}" with ${uploadedPhotos.length} photos.`,
+        `${albumProgress} Imported "${createdAlbum.title}" with ${uploadedPhotos.length}/${album.photos.length} photos.`,
       )
     }
   } finally {
