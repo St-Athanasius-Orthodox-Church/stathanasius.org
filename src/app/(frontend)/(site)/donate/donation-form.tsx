@@ -232,7 +232,7 @@ export function DonationForm({ checkoutStatus, initialEarmark, portalURL }: Dona
               <section className="border-t border-orthodox-gold/35 pt-6 text-center">
                 <a
                   href={portalURL}
-                  className="font-semibold text-orthodox-gold underline underline-offset-4 hover:text-byzantine-blue"
+                  className="font-semibold text-[#4169e1] underline underline-offset-4 hover:text-[#3151b7]"
                 >
                   Manage existing subscriptions
                 </a>
