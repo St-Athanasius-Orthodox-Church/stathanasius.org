@@ -63,6 +63,10 @@ export default buildConfig({
       max: 3,
       idleTimeoutMillis: 2000,
     },
+    // Never auto-push schema changes in dev. The dev database is shared and
+    // destructive pushes can wipe columns added by other work. Run
+    // `payload migrate` to apply migrations instead.
+    push: false,
   }),
   collections: [Media, Users, People, PhotoAlbums, Audios, Homilies, Files, Bulletins],
   cors: [getServerSideURL()].filter(Boolean),

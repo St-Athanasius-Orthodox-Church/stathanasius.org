@@ -4,6 +4,7 @@ import { cache } from 'react'
 
 import type { Media, PhotoAlbum } from '@/payload-types'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
+import { getOptimizedImageUrl } from '@/utilities/getOptimizedImageUrl'
 
 export type PhotoAlbumSummary = {
   id: string
@@ -34,20 +35,17 @@ export type PhotoAlbumDetail = {
   photos: Photo[]
 }
 
-function getMediaImageUrl(media: Media, size: 'thumbnail' | 'large'): string | null {
-  const url =
-    size === 'thumbnail'
-      ? media.sizes?.thumbnail?.url || media.thumbnailURL || media.url
-      : media.sizes?.large?.url || media.sizes?.xlarge?.url || media.url
-
-  return url ? getMediaUrl(url, media.updatedAt) : null
+function getMediaImageUrl(media: Media): string | null {
+  return media.url ? getMediaUrl(media.url, media.updatedAt) : null
 }
 
 function toPhoto(media: Media): Photo {
+  const url = getMediaImageUrl(media)
+
   return {
     id: String(media.id),
-    thumbnail_url: getMediaImageUrl(media, 'thumbnail') || '',
-    carousel_url: getMediaImageUrl(media, 'large') || '',
+    thumbnail_url: url || '',
+    carousel_url: url ? getOptimizedImageUrl(media.url, 1920, 75, media.updatedAt) : '',
   }
 }
 
@@ -64,7 +62,7 @@ function toPhotoAlbumSummary(album: PhotoAlbum): PhotoAlbumSummary {
     title: album.title || 'Untitled Album',
     date: album.date || album.createdAt,
     photo_count: album.photos?.length || 0,
-    cover_photo_url: coverPhoto ? getMediaImageUrl(coverPhoto, 'thumbnail') : null,
+    cover_photo_url: coverPhoto ? getMediaImageUrl(coverPhoto) : null,
   }
 }
 

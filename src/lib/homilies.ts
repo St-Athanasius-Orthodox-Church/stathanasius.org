@@ -57,9 +57,8 @@ function getSpeakerPhotoUrl(person: Person | null): string | null {
   }
 
   const photo = person.photo as Media
-  const url = photo.sizes?.small?.url || photo.sizes?.thumbnail?.url || photo.url
 
-  return url ? getMediaUrl(url, photo.updatedAt) : null
+  return photo.url ? getMediaUrl(photo.url, photo.updatedAt) : null
 }
 
 function getAudioUrl(audio: Audio | null): string | null {

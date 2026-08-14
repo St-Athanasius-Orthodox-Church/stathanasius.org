@@ -22,8 +22,14 @@ const nextConfig: NextConfig = {
       {
         pathname: '/api/media/file/**',
       },
+      {
+        pathname: '/media/**',
+      },
+      {
+        pathname: '/assets/**',
+      },
     ],
-    qualities: [100],
+    qualities: [75, 100],
     remotePatterns: [
       ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
         const url = new URL(item)
@@ -33,6 +39,12 @@ const nextConfig: NextConfig = {
           protocol: url.protocol.replace(':', '') as 'http' | 'https',
         }
       }),
+      // Media stored in Vercel Blob is served from the blob CDN in production,
+      // so its absolute URLs must be optimizable via remotePatterns.
+      {
+        hostname: '**.blob.vercel-storage.com',
+        protocol: 'https',
+      },
     ],
   },
   webpack: (webpackConfig) => {

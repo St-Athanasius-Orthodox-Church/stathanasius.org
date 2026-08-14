@@ -16,7 +16,6 @@ export function HomilyCard({ homily }: { homily: Homily }) {
               className="h-full w-full object-cover object-top"
               loading="lazy"
               sizes="80px"
-              unoptimized
             />
           ) : (
             <svg
