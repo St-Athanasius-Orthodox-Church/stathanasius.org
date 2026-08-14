@@ -26,9 +26,10 @@ import type { DonationCheckoutStatus } from '@/lib/stripe-checkout'
 type DonationFormProps = {
   checkoutStatus?: DonationCheckoutStatus | 'canceled'
   initialEarmark?: string
+  portalURL?: string
 }
 
-export function DonationForm({ checkoutStatus, initialEarmark }: DonationFormProps) {
+export function DonationForm({ checkoutStatus, initialEarmark, portalURL }: DonationFormProps) {
   const [data, setData] = useState({
     amount: '',
     frequency: 'one-time',
@@ -226,6 +227,17 @@ export function DonationForm({ checkoutStatus, initialEarmark }: DonationFormPro
               {isSubmitting && <Spinner />}
               {isSubmitting ? 'Opening secure checkout...' : 'Continue to secure checkout'}
             </Button>
+
+            {portalURL && (
+              <section className="border-t border-orthodox-gold/35 pt-6 text-center">
+                <a
+                  href={portalURL}
+                  className="font-semibold text-orthodox-gold underline underline-offset-4 hover:text-byzantine-blue"
+                >
+                  Manage existing subscriptions
+                </a>
+              </section>
+            )}
           </FieldGroup>
         </form>
       </CardContent>

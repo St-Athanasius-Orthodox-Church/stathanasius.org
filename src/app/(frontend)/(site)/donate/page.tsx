@@ -46,6 +46,7 @@ export default async function DonatePage({ searchParams }: DonatePageProps) {
         <DonationForm
           checkoutStatus={checkoutStatus}
           initialEarmark={params.earmark}
+          portalURL={process.env.NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL}
         />
       </Hero>
     </>
