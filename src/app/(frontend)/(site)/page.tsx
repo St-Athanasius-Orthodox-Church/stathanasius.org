@@ -180,9 +180,13 @@ export default async function Welcome() {
                 <h3 className="mb-4 text-center font-cinzel text-xl font-semibold text-byzantine-blue">
                   Other
                 </h3>
-                <div className="mb-4 flex justify-between gap-2">
+                <div className="flex justify-between gap-2">
                   <span className="font-medium">Daily Vespers</span>
                   <span className="text-sm text-burgundy">Tuesday/Thursday 5:30 PM</span>
+                </div>
+                <div className="mb-4 flex justify-between gap-2">
+                  <span className="font-medium">Bible Study</span>
+                  <span className="text-sm text-burgundy">Tuesday 6:00 PM</span>
                 </div>
                 <p className="leading-relaxed">
                   For weekday and feast day services, please check the{' '}

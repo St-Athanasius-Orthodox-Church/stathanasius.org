@@ -1,9 +1,10 @@
-import * as migration_20260813_054127 from './20260813_054127'
-import * as migration_20260814_015041 from './20260814_015041'
-import * as migration_20260814_020943 from './20260814_020943'
-import * as migration_20260814_165942 from './20260814_165942'
-import * as migration_20260816_214451_add_user_role from './20260816_214451_add_user_role'
-import * as migration_20260817_065202_posts from './20260817_065202_posts'
+import * as migration_20260813_054127 from './20260813_054127';
+import * as migration_20260814_015041 from './20260814_015041';
+import * as migration_20260814_020943 from './20260814_020943';
+import * as migration_20260814_165942 from './20260814_165942';
+import * as migration_20260816_214451_add_user_role from './20260816_214451_add_user_role';
+import * as migration_20260817_065202_posts from './20260817_065202_posts';
+import * as migration_20260817_071626 from './20260817_071626';
 
 export const migrations = [
   {
@@ -36,4 +37,9 @@ export const migrations = [
     down: migration_20260817_065202_posts.down,
     name: '20260817_065202_posts',
   },
-]
+  {
+    up: migration_20260817_071626.up,
+    down: migration_20260817_071626.down,
+    name: '20260817_071626'
+  },
+];
