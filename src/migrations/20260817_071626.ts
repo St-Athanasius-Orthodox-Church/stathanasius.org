@@ -30,10 +30,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   DROP TABLE "forms" CASCADE;
   DROP TABLE "form_submissions_submission_data" CASCADE;
   DROP TABLE "form_submissions" CASCADE;
-  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_forms_fk";
-  
-  ALTER TABLE "payload_locked_documents_rels" DROP CONSTRAINT "payload_locked_documents_rels_form_submissions_fk";
-  
   DROP INDEX "payload_locked_documents_rels_forms_id_idx";
   DROP INDEX "payload_locked_documents_rels_form_submissions_id_idx";
   ALTER TABLE "payload_locked_documents_rels" DROP COLUMN "forms_id";
