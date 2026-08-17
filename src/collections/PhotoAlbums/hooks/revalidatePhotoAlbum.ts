@@ -11,6 +11,7 @@ export const revalidatePhotoAlbum: CollectionAfterChangeHook<PhotoAlbum> = ({
   if (!context.disableRevalidate) {
     payload.logger.info(`Revalidating photo albums at /photo-albums/${doc.id}`)
 
+    revalidatePath('/')
     revalidatePath('/photo-albums')
     revalidatePath(`/photo-albums/${doc.id}`)
   }
@@ -23,6 +24,7 @@ export const revalidatePhotoAlbumDelete: CollectionAfterDeleteHook<PhotoAlbum> =
   req: { context },
 }) => {
   if (!context.disableRevalidate) {
+    revalidatePath('/')
     revalidatePath('/photo-albums')
 
     if (doc?.id) {

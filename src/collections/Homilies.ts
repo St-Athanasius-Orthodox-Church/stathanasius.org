@@ -1,7 +1,29 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionConfig } from 'payload'
+
+import { revalidatePath } from 'next/cache'
 
 import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
+
+const revalidateHomilies: CollectionAfterChangeHook = ({ doc, req: { payload, context } }) => {
+  if (!context.disableRevalidate) {
+    payload.logger.info('Revalidating homilies')
+
+    revalidatePath('/')
+    revalidatePath('/homilies')
+  }
+
+  return doc
+}
+
+const revalidateHomiliesDelete: CollectionAfterDeleteHook = ({ doc, req: { context } }) => {
+  if (!context.disableRevalidate) {
+    revalidatePath('/')
+    revalidatePath('/homilies')
+  }
+
+  return doc
+}
 
 export const Homilies: CollectionConfig = {
   slug: 'homilies',
@@ -10,6 +32,10 @@ export const Homilies: CollectionConfig = {
     delete: authenticated,
     read: anyone,
     update: authenticated,
+  },
+  hooks: {
+    afterChange: [revalidateHomilies],
+    afterDelete: [revalidateHomiliesDelete],
   },
   admin: {
     defaultColumns: ['title', 'date', 'speaker', 'updatedAt'],

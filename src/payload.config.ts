@@ -11,6 +11,7 @@ import { Audios } from './collections/Audios'
 import { Files } from './collections/Files'
 import { Bulletins } from './collections/Bulletins'
 import { Homilies } from './collections/Homilies'
+import { Posts } from './collections/Posts'
 import { Users } from './collections/Users'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
@@ -68,7 +69,7 @@ export default buildConfig({
     // `payload migrate` to apply migrations instead.
     push: false,
   }),
-  collections: [Media, Users, People, PhotoAlbums, Audios, Homilies, Files, Bulletins],
+  collections: [Media, Users, People, PhotoAlbums, Audios, Homilies, Files, Bulletins, Posts],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins,

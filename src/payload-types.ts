@@ -75,6 +75,7 @@ export interface Config {
     homilies: Homily;
     files: File;
     bulletins: Bulletin;
+    posts: Post;
     forms: Form;
     'form-submissions': FormSubmission;
     'payload-kv': PayloadKv;
@@ -92,6 +93,7 @@ export interface Config {
     homilies: HomiliesSelect<false> | HomiliesSelect<true>;
     files: FilesSelect<false> | FilesSelect<true>;
     bulletins: BulletinsSelect<false> | BulletinsSelect<true>;
+    posts: PostsSelect<false> | PostsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
@@ -306,6 +308,47 @@ export interface Bulletin {
   file: number | File;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts".
+ */
+export interface Post {
+  id: number;
+  title: string;
+  /**
+   * When enabled, the slug will auto-generate from the title field on save and autosave.
+   */
+  generateSlug?: boolean | null;
+  slug: string;
+  /**
+   * Defaults to the publish date if left blank.
+   */
+  publishedAt?: string | null;
+  /**
+   * A short summary shown on the blog index and home page.
+   */
+  excerpt?: string | null;
+  coverImage?: (number | null) | Media;
+  author?: (number | null) | Person;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  updatedAt: string;
+  createdAt: string;
+  _status?: ('draft' | 'published') | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -555,6 +598,10 @@ export interface PayloadLockedDocument {
         value: number | Bulletin;
       } | null)
     | ({
+        relationTo: 'posts';
+        value: number | Post;
+      } | null)
+    | ({
         relationTo: 'forms';
         value: number | Form;
       } | null)
@@ -727,6 +774,23 @@ export interface BulletinsSelect<T extends boolean = true> {
   file?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "posts_select".
+ */
+export interface PostsSelect<T extends boolean = true> {
+  title?: T;
+  generateSlug?: T;
+  slug?: T;
+  publishedAt?: T;
+  excerpt?: T;
+  coverImage?: T;
+  author?: T;
+  content?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  _status?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

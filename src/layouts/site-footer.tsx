@@ -78,6 +78,12 @@ export function SiteFooter() {
                 Calendar
               </Link>
               <Link
+                href="/blog"
+                className="text-gray-300 transition-colors hover:text-white"
+              >
+                Blog
+              </Link>
+              <Link
                 href="/photo-albums"
                 className="text-gray-300 transition-colors hover:text-white"
               >

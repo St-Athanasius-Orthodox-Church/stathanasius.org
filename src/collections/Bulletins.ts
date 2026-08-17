@@ -1,7 +1,29 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionConfig } from 'payload'
+
+import { revalidatePath } from 'next/cache'
 
 import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
+
+const revalidateBulletins: CollectionAfterChangeHook = ({ doc, req: { payload, context } }) => {
+  if (!context.disableRevalidate) {
+    payload.logger.info('Revalidating bulletins')
+
+    revalidatePath('/')
+    revalidatePath('/bulletins')
+  }
+
+  return doc
+}
+
+const revalidateBulletinsDelete: CollectionAfterDeleteHook = ({ doc, req: { context } }) => {
+  if (!context.disableRevalidate) {
+    revalidatePath('/')
+    revalidatePath('/bulletins')
+  }
+
+  return doc
+}
 
 export const Bulletins: CollectionConfig = {
   slug: 'bulletins',
@@ -10,6 +32,10 @@ export const Bulletins: CollectionConfig = {
     delete: authenticated,
     read: anyone,
     update: authenticated,
+  },
+  hooks: {
+    afterChange: [revalidateBulletins],
+    afterDelete: [revalidateBulletinsDelete],
   },
   admin: {
     defaultColumns: ['date', 'updatedAt'],

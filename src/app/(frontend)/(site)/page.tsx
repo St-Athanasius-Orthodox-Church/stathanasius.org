@@ -1,11 +1,24 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
-import { ClockIcon, MailIcon, MapPinIcon, PhoneIcon } from 'lucide-react'
+import {
+  BookOpenIcon,
+  CalendarIcon,
+  ClockIcon,
+  FileTextIcon,
+  ImageIcon,
+  MailIcon,
+  MapPinIcon,
+  Mic2Icon,
+  PhoneIcon,
+} from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Hero } from '@/components/ui/hero'
 import { Hyperlink } from '@/components/ui/hyperlink'
+import { formatPostDate } from '@/lib/posts'
+import { getRecentItems, type RecentItemType } from '@/lib/recent'
 const bishopUrl = '/assets/bishop.jpg'
 const fr1Url = '/assets/fr1.jpg'
 const preachUrl = '/assets/preach.jpg'
@@ -17,7 +30,25 @@ export const metadata: Metadata = {
     'St. Athanasius Antiochian Orthodox Church in Santa Barbara, CA. Join us for Divine Liturgy, learn about Orthodox Christianity, and become part of our community.',
 }
 
-export default function Welcome() {
+export const revalidate = 600
+
+function RecentItemIcon({ type }: { type: RecentItemType }) {
+  const iconClass = 'size-10 text-byzantine-blue/30'
+
+  switch (type) {
+    case 'blog':
+      return <BookOpenIcon className={iconClass} />
+    case 'photos':
+      return <ImageIcon className={iconClass} />
+    case 'homily':
+      return <Mic2Icon className={iconClass} />
+    case 'bulletin':
+      return <FileTextIcon className={iconClass} />
+  }
+}
+
+export default async function Welcome() {
+  const recentItems = await getRecentItems(5)
   return (
     <>
       <Hero
@@ -39,6 +70,61 @@ export default function Welcome() {
           </>
         }
       />
+
+      {/* Recently Section */}
+      <section className="container mx-auto max-w-5xl px-4 py-16" id="recently">
+        <h2 className="heading-orthodox mb-2 text-center text-3xl font-semibold md:text-4xl">
+          Recently
+        </h2>
+        <div className="mx-auto mb-10 h-0.5 w-16" style={{ background: 'var(--orthodox-gold)' }} />
+
+        {recentItems.length === 0 ? null : (
+          <>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {recentItems.map((item) => (
+                <Link
+                  key={`${item.type}-${item.href}`}
+                  href={item.href}
+                  className="group overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-all duration-300 hover:border-orthodox-gold/50 hover:shadow-lg"
+                >
+                  <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+                    {item.image_url ? (
+                      <Image
+                        src={item.image_url}
+                        alt={item.title}
+                        fill
+                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                      />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-byzantine-blue/10">
+                        <RecentItemIcon type={item.type} />
+                      </div>
+                    )}
+                    <span className="absolute top-3 left-3 rounded-full bg-byzantine-blue/90 px-2.5 py-1 text-xs font-medium text-white">
+                      {item.type_label}
+                    </span>
+                  </div>
+                  <div className="p-4">
+                    <h3 className="line-clamp-2 font-cinzel text-base font-medium text-byzantine-blue transition-colors group-hover:text-orthodox-gold">
+                      {item.title}
+                    </h3>
+                    <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+                      <CalendarIcon className="size-3.5" />
+                      {formatPostDate(item.date)}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <div className="mt-8 text-center">
+              <Button asChild variant="byzantineOutline" size="xl">
+                <Link href="/blog">Visit the Blog</Link>
+              </Button>
+            </div>
+          </>
+        )}
+      </section>
 
       {/* Services Section */}
       <section className="container mx-auto max-w-5xl px-4 py-16" id="services">
