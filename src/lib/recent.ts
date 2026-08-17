@@ -73,13 +73,27 @@ function toHomilyItem(homily: Homily): RecentItem {
   }
 }
 
+function getBulletinPdfUrl(bulletin: Bulletin): string | null {
+  if (typeof bulletin.file !== 'object') return null
+
+  const file = bulletin.file
+
+  if (file.url) {
+    return getMediaUrl(file.url, file.updatedAt)
+  }
+
+  return file.filename ? `/files/${encodeURIComponent(file.filename)}` : null
+}
+
 function toBulletinItem(bulletin: Bulletin): RecentItem {
+  const pdfUrl = getBulletinPdfUrl(bulletin)
+
   return {
     type: 'bulletin',
     type_label: 'Bulletin',
     title: 'Parish Bulletin',
     date: bulletin.date,
-    href: '/bulletins',
+    href: pdfUrl ?? '/bulletins',
     image_url: null,
   }
 }
@@ -117,7 +131,7 @@ export const getRecentItems = cache(async (limit = 5): Promise<RecentItem[]> => 
     }),
     payload.find({
       collection: 'bulletins',
-      depth: 0,
+      depth: 1,
       limit: 5,
       overrideAccess: false,
       pagination: false,
