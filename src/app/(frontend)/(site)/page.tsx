@@ -85,6 +85,7 @@ export default async function Welcome() {
                 key={`${item.type}-${item.href}`}
                 href={item.href}
                 className="group overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-all duration-300 hover:border-orthodox-gold/50 hover:shadow-lg"
+                target="_blank"
               >
                 <div className="relative aspect-[16/9] overflow-hidden bg-muted">
                   {item.image_url ? (
