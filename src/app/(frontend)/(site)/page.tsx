@@ -79,50 +79,43 @@ export default async function Welcome() {
         <div className="mx-auto mb-10 h-0.5 w-16" style={{ background: 'var(--orthodox-gold)' }} />
 
         {recentItems.length === 0 ? null : (
-          <>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {recentItems.map((item) => (
-                <Link
-                  key={`${item.type}-${item.href}`}
-                  href={item.href}
-                  className="group overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-all duration-300 hover:border-orthodox-gold/50 hover:shadow-lg"
-                >
-                  <div className="relative aspect-[16/9] overflow-hidden bg-muted">
-                    {item.image_url ? (
-                      <Image
-                        src={item.image_url}
-                        alt={item.title}
-                        fill
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-byzantine-blue/10">
-                        <RecentItemIcon type={item.type} />
-                      </div>
-                    )}
-                    <span className="absolute top-3 left-3 rounded-full bg-byzantine-blue/90 px-2.5 py-1 text-xs font-medium text-white">
-                      {item.type_label}
-                    </span>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="line-clamp-2 font-cinzel text-base font-medium text-byzantine-blue transition-colors group-hover:text-orthodox-gold">
-                      {item.title}
-                    </h3>
-                    <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
-                      <CalendarIcon className="size-3.5" />
-                      {formatPostDate(item.date)}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-            <div className="mt-8 text-center">
-              <Button asChild variant="byzantineOutline" size="xl">
-                <Link href="/blog">Visit the Blog</Link>
-              </Button>
-            </div>
-          </>
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {recentItems.map((item) => (
+              <Link
+                key={`${item.type}-${item.href}`}
+                href={item.href}
+                className="group overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-all duration-300 hover:border-orthodox-gold/50 hover:shadow-lg"
+              >
+                <div className="relative aspect-[16/9] overflow-hidden bg-muted">
+                  {item.image_url ? (
+                    <Image
+                      src={item.image_url}
+                      alt={item.title}
+                      fill
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center bg-byzantine-blue/10">
+                      <RecentItemIcon type={item.type} />
+                    </div>
+                  )}
+                  <span className="absolute top-3 left-3 rounded-full bg-byzantine-blue/90 px-2.5 py-1 text-xs font-medium text-white">
+                    {item.type_label}
+                  </span>
+                </div>
+                <div className="p-4">
+                  <h3 className="line-clamp-2 font-cinzel text-base font-medium text-byzantine-blue transition-colors group-hover:text-orthodox-gold">
+                    {item.title}
+                  </h3>
+                  <p className="mt-1 flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <CalendarIcon className="size-3.5" />
+                    {formatPostDate(item.date)}
+                  </p>
+                </div>
+              </Link>
+            ))}
+          </div>
         )}
       </section>
 
