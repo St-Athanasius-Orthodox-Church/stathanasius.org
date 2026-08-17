@@ -1,12 +1,18 @@
 import 'dotenv/config'
 
-import { basename, extname } from 'node:path'
+import { createWriteStream } from 'node:fs'
+import { mkdtemp, mkdir, readFile, rm, stat } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { basename, extname, join } from 'node:path'
+import { Readable } from 'node:stream'
+import { pipeline } from 'node:stream/promises'
+import type { ReadableStream as NodeReadableStream } from 'node:stream/web'
 
 import config from '@payload-config'
 import { getPayload } from 'payload'
 import type { File } from 'payload'
 import { z } from 'zod'
-import type { Media, PhotoAlbum } from '@/payload-types'
+import type { PhotoAlbum } from '@/payload-types'
 
 import { mapWithConcurrency } from './lib/map-with-concurrency'
 
@@ -61,9 +67,18 @@ type ImportedPhoto = {
   fileUrl: string
 }
 
+type DownloadedPhoto = {
+  filename: string
+  localPath: string
+  mimetype: string
+  size: number
+  sourceUrl: string
+}
+
 type UploadedPhoto = {
   id: number
   filename: string
+  sourceUrl: string
 }
 
 function parseJson<T>(schema: z.ZodType<T>, value: unknown, description: string): T {
@@ -140,6 +155,11 @@ function getFilename(fileUrl: string): string {
   return filename
 }
 
+function getPhotoIdentity(fileUrl: string): string {
+  const pathname = new URL(fileUrl).pathname
+  return pathname.match(/\/redirect\/([^/]+)/)?.[1] || pathname
+}
+
 function getMimeType(response: Response, filename: string): string {
   const contentType = response.headers.get('content-type')?.split(';')[0].trim()
   if (contentType?.startsWith('image/')) return contentType
@@ -160,7 +180,7 @@ function getMimeType(response: Response, filename: string): string {
   return mimeType
 }
 
-async function downloadPhoto(photo: ImportedPhoto): Promise<{ file: File; filename: string }> {
+async function downloadPhoto(photo: ImportedPhoto, localPath: string): Promise<DownloadedPhoto> {
   const response = await fetch(photo.fileUrl)
 
   if (!response.ok) {
@@ -168,21 +188,34 @@ async function downloadPhoto(photo: ImportedPhoto): Promise<{ file: File; filena
   }
 
   const filename = getFilename(photo.fileUrl)
-  const data = Buffer.from(await response.arrayBuffer())
+  const mimetype = getMimeType(response, filename)
+
+  if (!response.body) {
+    throw new Error(`The photo download returned an empty body for ${photo.fileUrl}.`)
+  }
+
+  await pipeline(
+    Readable.fromWeb(response.body as unknown as NodeReadableStream),
+    createWriteStream(localPath),
+  )
+  const fileStat = await stat(localPath)
 
   return {
-    file: {
-      data,
-      mimetype: getMimeType(response, filename),
-      name: filename,
-      size: data.length,
-    },
     filename,
+    localPath,
+    mimetype,
+    size: fileStat.size,
+    sourceUrl: photo.fileUrl,
   }
 }
 
-function normalizeFilename(filename: string): string {
-  return decodeURIComponent(filename).toLowerCase()
+async function getUploadFile(photo: DownloadedPhoto): Promise<File> {
+  return {
+    data: await readFile(photo.localPath),
+    mimetype: photo.mimetype,
+    name: photo.filename,
+    size: photo.size,
+  }
 }
 
 function parseLimitArg(): number | undefined {
@@ -241,46 +274,26 @@ async function importAlbums() {
   }
 
   const payload = await getPayload({ config })
-  const existingAlbums = force
-    ? []
-    : await payload.find({
-        collection: 'photo-albums',
-        depth: 0,
-        limit: 100000,
-        overrideAccess: true,
-      })
-  const existingDocs: PhotoAlbum[] = Array.isArray(existingAlbums)
-    ? existingAlbums
-    : existingAlbums.docs
-  const existingKeys = new Set(
-    existingDocs.map(
-      (album) => `${album.title}\u0000${new Date(album.date).toISOString().slice(0, 10)}`,
-    ),
-  )
-  const existingMedia = await payload.find({
-    collection: 'media',
-    depth: 0,
-    limit: 100000,
-    overrideAccess: true,
-  })
-  const existingMediaDocs: Media[] = Array.isArray(existingMedia)
-    ? existingMedia
-    : existingMedia.docs
-  const existingMediaByFilename = new Map<string, UploadedPhoto>()
-
-  for (const media of existingMediaDocs) {
-    if (media.filename) {
-      existingMediaByFilename.set(normalizeFilename(media.filename), {
-        id: media.id,
-        filename: media.filename,
-      })
-    }
-  }
-
-  const uploadedByUrl = new Map<string, UploadedPhoto>()
-  const inFlightUploads = new Map<string, Promise<UploadedPhoto>>()
+  const stagingDirectory = await mkdtemp(join(tmpdir(), 'st-athanasius-photo-albums-'))
 
   try {
+    const existingAlbums = force
+      ? []
+      : await payload.find({
+          collection: 'photo-albums',
+          depth: 0,
+          limit: 100000,
+          overrideAccess: true,
+        })
+    const existingDocs: PhotoAlbum[] = Array.isArray(existingAlbums)
+      ? existingAlbums
+      : existingAlbums.docs
+    const existingKeys = new Set(
+      existingDocs.map(
+        (album) => `${album.title}\u0000${new Date(album.date).toISOString().slice(0, 10)}`,
+      ),
+    )
+
     for (const [albumIndex, album] of albums.entries()) {
       const albumProgress = `[Album ${albumIndex + 1}/${albums.length}]`
       const albumKey = `${album.title}\u0000${album.date.slice(0, 10)}`
@@ -291,8 +304,11 @@ async function importAlbums() {
 
       console.log(`${albumProgress} Importing "${album.title}".`)
 
-      const albumFailures: { filename: string; reason: string }[] = []
-      const uploadedPhotos = (
+      const albumDirectory = join(stagingDirectory, String(album.id))
+      await mkdir(albumDirectory)
+
+      const downloadFailures: { filename: string; reason: string }[] = []
+      const downloadedPhotos = (
         await mapWithConcurrency(
           album.photos,
           workers,
@@ -301,103 +317,116 @@ async function importAlbums() {
             const filename = getFilename(photo.fileUrl)
 
             try {
-              let uploaded = uploadedByUrl.get(photo.fileUrl)
+              console.log(`${photoProgress} Downloading ${filename}.`)
+              const downloaded = await downloadPhoto(
+                photo,
+                join(albumDirectory, String(photoIndex)),
+              )
+              console.log(`${photoProgress} Downloaded ${filename}.`)
+              return downloaded
+            } catch (error) {
+              const reason = error instanceof Error ? error.message : String(error)
+              downloadFailures.push({ filename, reason })
+              console.warn(`${photoProgress} Failed to download ${filename}: ${reason}`)
+              return undefined
+            }
+          },
+        )
+      ).filter((photo): photo is DownloadedPhoto => photo !== undefined)
 
-              if (!uploaded) {
-                let inFlight = inFlightUploads.get(photo.fileUrl)
+      console.log(
+        `${albumProgress} Downloaded ${downloadedPhotos.length}/${album.photos.length} photos. Uploading.`,
+      )
 
-                if (!inFlight) {
-                  inFlight = (async () => {
-                    const existing = existingMediaByFilename.get(normalizeFilename(filename))
+      const uploadFailures: { filename: string; reason: string }[] = []
+      const uploadedPhotos = (
+        await mapWithConcurrency(
+          downloadedPhotos,
+          workers,
+          async (photo, photoIndex) => {
+            const photoProgress = `${albumProgress} [Photo ${photoIndex + 1}/${downloadedPhotos.length}]`
 
-                    if (existing) {
-                      console.log(`${photoProgress} Reusing ${existing.filename}.`)
-                      return existing
-                    }
+            try {
+              console.log(`${photoProgress} Uploading ${photo.filename}.`)
+              const media = await payload.create({
+                collection: 'media',
+                data: { alt: photo.filename },
+                file: await getUploadFile(photo),
+                overrideAccess: true,
+              })
 
-                    console.log(`${photoProgress} Downloading ${filename}.`)
-                    const downloaded = await downloadPhoto(photo)
-                    const media = await payload.create({
-                      collection: 'media',
-                      data: { alt: downloaded.filename },
-                      file: downloaded.file,
-                      overrideAccess: true,
-                    })
-
-                    const result = {
-                      id: media.id,
-                      filename: downloaded.filename,
-                    }
-                    existingMediaByFilename.set(normalizeFilename(filename), result)
-                    console.log(`${photoProgress} Uploaded ${downloaded.filename}.`)
-                    return result
-                  })()
-
-                  inFlightUploads.set(photo.fileUrl, inFlight)
-                }
-
-                uploaded = await inFlight
-                uploadedByUrl.set(photo.fileUrl, uploaded)
-              } else {
-                console.log(`${photoProgress} Reusing ${uploaded.filename}.`)
+              const uploaded = {
+                id: media.id,
+                filename: media.filename || photo.filename,
+                sourceUrl: photo.sourceUrl,
               }
-
-              console.log(`${photoProgress} Complete.`)
+              console.log(`${photoProgress} Uploaded ${uploaded.filename}.`)
               return uploaded
             } catch (error) {
-              inFlightUploads.delete(photo.fileUrl)
               const reason = error instanceof Error ? error.message : String(error)
-              albumFailures.push({ filename, reason })
-              console.warn(`${photoProgress} Skipping ${filename}: ${reason}`)
+              uploadFailures.push({ filename: photo.filename, reason })
+              console.warn(`${photoProgress} Failed to upload ${photo.filename}: ${reason}`)
               return undefined
             }
           },
         )
       ).filter((photo): photo is UploadedPhoto => photo !== undefined)
 
+      if (uploadedPhotos.length === 0) {
+        console.warn(`${albumProgress} Skipping album "${album.title}": no photos were uploaded.`)
+        await rm(albumDirectory, { force: true, recursive: true })
+        continue
+      }
+
       const coverPhoto = album.coverUrl
-        ? uploadedByUrl.get(album.coverUrl) ||
-          uploadedPhotos.find(
-            (photo) =>
-              normalizeFilename(photo.filename) === normalizeFilename(getFilename(album.coverUrl!)),
+        ? uploadedPhotos.find(
+            (photo) => getPhotoIdentity(photo.sourceUrl) === getPhotoIdentity(album.coverUrl!),
           )
         : undefined
 
       if (album.coverUrl && !coverPhoto) {
-        console.warn(`No uploaded photo matches the cover filename for "${album.title}".`)
+        console.warn(`No uploaded photo matches the cover URL for "${album.title}".`)
       }
 
-      if (uploadedPhotos.length === 0) {
+      let createdAlbum: PhotoAlbum
+      try {
+        createdAlbum = await payload.create({
+          collection: 'photo-albums',
+          data: {
+            title: album.title,
+            date: new Date(`${album.date.slice(0, 10)}T12:00:00.000Z`).toISOString(),
+            photos: uploadedPhotos.map((photo) => photo.id),
+            ...(coverPhoto ? { coverPhoto: coverPhoto.id } : {}),
+          },
+          context: { disableRevalidate: true },
+          overrideAccess: true,
+        })
+      } catch (error) {
         console.warn(
-          `${albumProgress} Skipping album "${album.title}": all ${album.photos.length} photos failed to import.`,
+          `${albumProgress} Album creation failed; deleting ${uploadedPhotos.length} uploaded media item(s).`,
         )
-        continue
+        await mapWithConcurrency(uploadedPhotos, workers, async (photo) => {
+          await payload.delete({ collection: 'media', id: photo.id, overrideAccess: true })
+        })
+        throw error
       }
 
-      const createdAlbum = await payload.create({
-        collection: 'photo-albums',
-        data: {
-          title: album.title,
-          date: new Date(`${album.date.slice(0, 10)}T12:00:00.000Z`).toISOString(),
-          photos: uploadedPhotos.map((photo) => photo.id),
-          ...(coverPhoto ? { coverPhoto: coverPhoto.id } : {}),
-        },
-        context: { disableRevalidate: true },
-        overrideAccess: true,
-      })
-
-      existingKeys.add(albumKey)
-      if (albumFailures.length > 0) {
-        console.warn(
-          `${albumProgress} Skipped ${albumFailures.length} photo(s): ${albumFailures.map((failure) => failure.filename).join(', ')}`,
-        )
-      }
       console.log(
         `${albumProgress} Imported "${createdAlbum.title}" with ${uploadedPhotos.length}/${album.photos.length} photos.`,
       )
+      if (downloadFailures.length > 0 || uploadFailures.length > 0) {
+        console.warn(
+          `${albumProgress} Skipped ${downloadFailures.length} download(s) and ${uploadFailures.length} upload(s).`,
+        )
+      }
+      await rm(albumDirectory, { force: true, recursive: true })
     }
   } finally {
-    await payload.destroy()
+    try {
+      await rm(stagingDirectory, { force: true, recursive: true })
+    } finally {
+      await payload.destroy()
+    }
   }
 }
 
