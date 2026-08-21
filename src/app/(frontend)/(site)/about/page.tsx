@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 
 import { Hero } from '@/components/ui/hero'
 import { Hyperlink } from '@/components/ui/hyperlink'
@@ -106,7 +107,7 @@ export default function AboutUs() {
                 </p>
               </div>
               <div>
-                <img src={stAthanasiusUrl} alt="St. Athanasius" />
+                <Image src={stAthanasiusUrl} alt="St. Athanasius" width={150} height={389} />
               </div>
             </div>
           </div>
