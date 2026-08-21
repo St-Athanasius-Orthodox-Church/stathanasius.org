@@ -108,9 +108,6 @@ export function RegisterForm() {
         <CardTitle className="font-cinzel text-2xl font-semibold text-byzantine-blue md:text-3xl">
           Create Account
         </CardTitle>
-        <CardDescription className="text-byzantine-blue/70">
-          Join the St. Athanasius parish community
-        </CardDescription>
       </CardHeader>
 
       <CardContent>

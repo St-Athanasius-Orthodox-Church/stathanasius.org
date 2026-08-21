@@ -1,4 +1,8 @@
-import type { CollectionAfterChangeHook, CollectionAfterDeleteHook, CollectionConfig } from 'payload'
+import type {
+  CollectionAfterChangeHook,
+  CollectionAfterDeleteHook,
+  CollectionConfig,
+} from 'payload'
 
 import { revalidatePath } from 'next/cache'
 
@@ -57,6 +61,13 @@ export const Bulletins: CollectionConfig = {
       type: 'upload',
       relationTo: 'files',
       required: true,
+    },
+    {
+      name: 'coverPhoto',
+      type: 'upload',
+      relationTo: 'media',
+      filterOptions: { mimeType: { contains: 'image' } },
+      required: false,
     },
   ],
   timestamps: true,

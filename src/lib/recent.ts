@@ -87,6 +87,7 @@ function getBulletinPdfUrl(bulletin: Bulletin): string | null {
 
 function toBulletinItem(bulletin: Bulletin): RecentItem {
   const pdfUrl = getBulletinPdfUrl(bulletin)
+  const coverPhoto = typeof bulletin.coverPhoto === 'object' ? bulletin.coverPhoto : null
 
   return {
     type: 'bulletin',
@@ -94,7 +95,7 @@ function toBulletinItem(bulletin: Bulletin): RecentItem {
     title: 'Parish Bulletin',
     date: bulletin.date,
     href: pdfUrl ?? '/bulletins',
-    image_url: null,
+    image_url: getMediaImageUrl(coverPhoto),
   }
 }
 

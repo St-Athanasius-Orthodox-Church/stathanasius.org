@@ -103,14 +103,16 @@ export default async function BlogPage({ searchParams }: BlogPageProps) {
 
   return (
     <>
-      <Hero size="medium" title="Blog" subtitle="Weekly articles from our priest" />
+      <Hero size="medium" title="Blog" />
 
       <section className="container mx-auto px-4 py-12">
         {postPage.docs.length === 0 ? (
           <div className="py-16 text-center">
             <BookOpenIcon className="mx-auto size-16 text-muted-foreground/50" />
             <h2 className="mt-4 font-cinzel text-xl text-byzantine-blue">No Articles Yet</h2>
-            <p className="mt-2 text-muted-foreground">Check back soon for articles from our priest.</p>
+            <p className="mt-2 text-muted-foreground">
+              Check back soon for articles from our priest.
+            </p>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">

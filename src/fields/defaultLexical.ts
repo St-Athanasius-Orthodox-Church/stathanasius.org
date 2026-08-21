@@ -1,13 +1,28 @@
 import type { TextFieldSingleValidation } from 'payload'
 import {
+  AlignFeature,
+  BlockquoteFeature,
   BoldFeature,
+  BlocksFeature,
+  ChecklistFeature,
+  FixedToolbarFeature,
+  HeadingFeature,
+  HorizontalRuleFeature,
+  InlineCodeFeature,
+  InlineToolbarFeature,
+  IndentFeature,
   ItalicFeature,
   LinkFeature,
+  OrderedListFeature,
   ParagraphFeature,
   lexicalEditor,
+  StrikethroughFeature,
+  UnorderedListFeature,
   UnderlineFeature,
   type LinkFields,
 } from '@payloadcms/richtext-lexical'
+
+import { YouTubeEmbed } from '@/blocks/YouTubeEmbed/config'
 
 export const defaultLexical = lexicalEditor({
   features: [
@@ -15,6 +30,17 @@ export const defaultLexical = lexicalEditor({
     UnderlineFeature(),
     BoldFeature(),
     ItalicFeature(),
+    StrikethroughFeature(),
+    InlineCodeFeature(),
+    HeadingFeature({ enabledHeadingSizes: ['h2', 'h3', 'h4'] }),
+    AlignFeature(),
+    IndentFeature(),
+    UnorderedListFeature(),
+    OrderedListFeature(),
+    ChecklistFeature(),
+    BlockquoteFeature(),
+    BlocksFeature({ blocks: [YouTubeEmbed] }),
+    HorizontalRuleFeature(),
     LinkFeature({
       fields: ({ defaultFields }) => {
         const defaultFieldsWithoutUrl = defaultFields.filter((field) => {
@@ -42,5 +68,7 @@ export const defaultLexical = lexicalEditor({
         ]
       },
     }),
+    FixedToolbarFeature(),
+    InlineToolbarFeature(),
   ],
 })

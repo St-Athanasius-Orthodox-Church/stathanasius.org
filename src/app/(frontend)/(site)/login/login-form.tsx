@@ -61,9 +61,8 @@ export function LoginForm() {
     <Card variant="orthodox" goldBorderTop className="mx-auto w-full max-w-md gap-4 rounded-lg">
       <CardHeader className="pb-0 text-center">
         <CardTitle className="font-cinzel text-2xl font-semibold text-byzantine-blue md:text-3xl">
-          Welcome Back
+          Sign In
         </CardTitle>
-        <CardDescription className="text-byzantine-blue/70">Sign in to your account</CardDescription>
       </CardHeader>
 
       <CardContent>

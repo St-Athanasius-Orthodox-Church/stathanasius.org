@@ -2,6 +2,8 @@ import { type DefaultTypedEditorState } from '@payloadcms/richtext-lexical'
 import { RichText as ConvertRichText } from '@payloadcms/richtext-lexical/react'
 import { cn } from '@/utilities/ui'
 
+import { YouTubeEmbed } from './YouTubeEmbed'
+
 type Props = {
   data: DefaultTypedEditorState
   enableGutter?: boolean
@@ -17,10 +19,19 @@ export default function RichText(props: Props) {
         {
           container: enableGutter,
           'max-w-none': !enableGutter,
-          'mx-auto prose md:prose-md dark:prose-invert': enableProse,
+          'mx-auto prose md:prose-md': enableProse,
         },
         className,
       )}
+      converters={({ defaultConverters }) => ({
+        ...defaultConverters,
+        blocks: {
+          ...defaultConverters.blocks,
+          youtubeEmbed: ({ node }: { node: { fields: { url: string } } }) => (
+            <YouTubeEmbed url={node.fields.url} />
+          ),
+        },
+      })}
       {...rest}
     />
   )

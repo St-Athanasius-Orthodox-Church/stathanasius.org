@@ -302,6 +302,7 @@ export interface Bulletin {
   id: number;
   date: string;
   file: number | File;
+  coverPhoto?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -569,6 +570,7 @@ export interface FilesSelect<T extends boolean = true> {
 export interface BulletinsSelect<T extends boolean = true> {
   date?: T;
   file?: T;
+  coverPhoto?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -722,6 +724,19 @@ export interface CollectionsWidget {
     [k: string]: unknown;
   };
   width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "YouTubeEmbedBlock".
+ */
+export interface YouTubeEmbedBlock {
+  /**
+   * Paste a YouTube video URL, such as https://www.youtube.com/watch?v=...
+   */
+  url: string;
+  id?: string | null;
+  blockName?: string | null;
+  blockType: 'youtubeEmbed';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
