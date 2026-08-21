@@ -41,9 +41,7 @@ function toAlbumItem(album: PhotoAlbum): RecentItem {
   const coverPhoto =
     typeof album.coverPhoto === 'object' && album.coverPhoto
       ? album.coverPhoto
-      : album.photos?.find(
-          (photo): photo is Media => photo !== null && typeof photo === 'object',
-        )
+      : album.photos?.find((photo): photo is Media => photo !== null && typeof photo === 'object')
 
   return {
     type: 'photos',
@@ -59,9 +57,7 @@ function toHomilyItem(homily: Homily): RecentItem {
   const person = typeof homily.speaker === 'object' ? homily.speaker : null
   const speaker = person?.name || 'Unknown speaker'
   const photo =
-    person && typeof person.photo === 'object' && person.photo
-      ? (person.photo as Media)
-      : null
+    person && typeof person.photo === 'object' && person.photo ? (person.photo as Media) : null
 
   return {
     type: 'homily',
@@ -92,7 +88,7 @@ function toBulletinItem(bulletin: Bulletin): RecentItem {
   return {
     type: 'bulletin',
     type_label: 'Bulletin',
-    title: 'Parish Bulletin',
+    title: 'Weekly Bulletin',
     date: bulletin.date,
     href: pdfUrl ?? '/bulletins',
     image_url: getMediaImageUrl(coverPhoto),
