@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Hero } from '@/components/ui/hero'
 import { formatAlbumDate, getPhotoAlbum, getPhotoAlbums } from '@/lib/photo-albums'
+import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 
 import { PhotoAlbumGallery } from './photo-album-gallery'
 
@@ -36,6 +37,17 @@ export async function generateMetadata({
   return {
     title: `${album.title} - Photo Albums`,
     description: `Photos from ${album.title} at St. Athanasius Orthodox Church.`,
+    alternates: {
+      canonical: `/photo-albums/${id}`,
+    },
+    openGraph: mergeOpenGraph({
+      title: `${album.title} - St. Athanasius Orthodox Church`,
+      description: `Photos from ${album.title} at St. Athanasius Orthodox Church.`,
+      url: `/photo-albums/${id}`,
+      images: album.photos[0]?.carousel_url
+        ? [{ url: album.photos[0].carousel_url }]
+        : undefined,
+    }),
   }
 }
 

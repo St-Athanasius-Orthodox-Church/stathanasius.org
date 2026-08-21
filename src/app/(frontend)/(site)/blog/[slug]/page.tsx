@@ -8,6 +8,7 @@ import RichText from '@/components/RichText'
 import { Button } from '@/components/ui/button'
 import { Hero } from '@/components/ui/hero'
 import { formatPostDate, getAllPostSlugs, getPost } from '@/lib/posts'
+import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 
 export const revalidate = 600
 
@@ -33,6 +34,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title: `${post.title} - Blog`,
     description:
       post.excerpt || 'An article from the priest of St. Athanasius Orthodox Church.',
+    alternates: {
+      canonical: `/blog/${slug}`,
+    },
+    openGraph: mergeOpenGraph({
+      title: `${post.title} - St. Athanasius Orthodox Church`,
+      description:
+        post.excerpt || 'An article from the priest of St. Athanasius Orthodox Church.',
+      type: 'article',
+      url: `/blog/${slug}`,
+      images: post.cover_image_url ? [{ url: post.cover_image_url }] : undefined,
+    }),
   }
 }
 

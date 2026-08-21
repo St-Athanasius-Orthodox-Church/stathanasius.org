@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 
 import { Hero } from '@/components/ui/hero'
 import { clergySlugs, getClergyBio } from '@/lib/clergy'
+import { mergeOpenGraph } from '@/utilities/mergeOpenGraph'
 
 type PageProps = {
   params: Promise<{ slug: string }>
@@ -26,6 +27,14 @@ export async function generateMetadata({
   return {
     title: member.name,
     description: `${member.name}, ${member.title} at St. Athanasius Orthodox Church in Santa Barbara.`,
+    alternates: {
+      canonical: `/clergy/${slug}`,
+    },
+    openGraph: mergeOpenGraph({
+      title: `${member.name} - St. Athanasius Orthodox Church`,
+      description: `${member.name}, ${member.title} at St. Athanasius Orthodox Church in Santa Barbara.`,
+      url: `/clergy/${slug}`,
+    }),
   }
 }
 

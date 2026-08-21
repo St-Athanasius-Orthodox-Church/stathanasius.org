@@ -11,7 +11,9 @@ type SeoDocument = {
 }
 
 const generateTitle: GenerateTitle<SeoDocument> = ({ doc }) => {
-  return doc?.title ? `${doc.title} | Payload Website Template` : 'Payload Website Template'
+  return doc?.title
+    ? `${doc.title} | St. Athanasius Orthodox Church`
+    : 'St. Athanasius Orthodox Church'
 }
 
 const generateURL: GenerateURL<SeoDocument> = ({ doc }) => {
