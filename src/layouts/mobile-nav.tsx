@@ -2,11 +2,18 @@
 
 import Link from 'next/link'
 import { ChevronDown, MenuIcon, XIcon } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 import { navItems } from '@/layouts/nav-items'
 
-export function MobileNav() {
+type MobileNavProps = {
+  authLabel: string | null
+  authHref: string | null
+}
+
+export function MobileNav({ authLabel, authHref }: MobileNavProps) {
+  const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
 
@@ -19,11 +26,24 @@ export function MobileNav() {
     setExpandedSection(null)
   }
 
+  const handleSignOut = async () => {
+    closeMobileMenu()
+    try {
+      await fetch('/api/users/logout', {
+        method: 'POST',
+        credentials: 'include',
+      })
+    } finally {
+      router.push('/')
+      router.refresh()
+    }
+  }
+
   return (
     <>
       <button
         type="button"
-        className="ml-auto rounded p-2 transition-colors hover:bg-white/10 md:hidden"
+        className="ml-auto rounded p-2 transition-colors hover:bg-white/10 lg:hidden"
         onClick={() => {
           setMobileMenuOpen(!mobileMenuOpen)
           if (mobileMenuOpen) setExpandedSection(null)
@@ -40,7 +60,7 @@ export function MobileNav() {
 
       {mobileMenuOpen && (
         <div
-          className="absolute top-full right-0 left-0 z-50 bg-byzantine-blue-dark shadow-xl md:hidden"
+          className="absolute top-full right-0 left-0 z-50 bg-byzantine-blue-dark shadow-xl lg:hidden"
           style={{ borderTop: '1px solid var(--orthodox-gold)' }}
         >
           <nav className="container mx-auto flex flex-col py-2">
@@ -83,6 +103,26 @@ export function MobileNav() {
                 </Link>
               ),
             )}
+            {authLabel &&
+              (authLabel === 'Sign Out' ? (
+                <button
+                  type="button"
+                  onClick={handleSignOut}
+                  className="px-6 py-3 text-left text-gray-100 hover:text-white"
+                >
+                  {authLabel}
+                </button>
+              ) : (
+                authHref && (
+                  <Link
+                    href={authHref}
+                    className="px-6 py-3 text-gray-100 hover:text-white"
+                    onClick={closeMobileMenu}
+                  >
+                    {authLabel}
+                  </Link>
+                )
+              ))}
           </nav>
         </div>
       )}

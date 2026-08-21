@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { ChevronDown } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 import {
   DropdownMenu,
@@ -11,9 +12,27 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { navItems } from '@/layouts/nav-items'
 
-export function DesktopNav() {
+type DesktopNavProps = {
+  authLabel: string | null
+  authHref: string | null
+}
+
+export function DesktopNav({ authLabel, authHref }: DesktopNavProps) {
+  const router = useRouter()
+
+  const handleSignOut = async () => {
+    try {
+      await fetch('/api/users/logout', {
+        method: 'POST',
+        credentials: 'include',
+      })
+    } finally {
+      router.push('/')
+      router.refresh()
+    }
+  }
   return (
-    <div className="hidden md:ml-auto md:flex md:items-center md:gap-1">
+    <div className="hidden lg:ml-auto lg:flex lg:items-center md:gap-1">
       {navItems.map((item) =>
         'children' in item ? (
           <DropdownMenu key={item.label}>
@@ -40,6 +59,25 @@ export function DesktopNav() {
           </Link>
         ),
       )}
+      {authLabel &&
+        (authLabel === 'Sign Out' ? (
+          <button
+            type="button"
+            onClick={handleSignOut}
+            className="rounded px-4 py-2 font-medium tracking-wide text-gray-100 transition-all duration-200 hover:bg-white/10 hover:text-white"
+          >
+            {authLabel}
+          </button>
+        ) : (
+          authHref && (
+            <Link
+              href={authHref}
+              className="rounded px-4 py-2 font-medium tracking-wide text-gray-100 transition-all duration-200 hover:bg-white/10 hover:text-white"
+            >
+              {authLabel}
+            </Link>
+          )
+        ))}
     </div>
   )
 }

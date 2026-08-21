@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { editorOrUp } from '../../access/editorOrUp'
+import { registerEndpoint } from './endpoints/register'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -17,6 +18,7 @@ export const Users: CollectionConfig = {
     useAsTitle: 'name',
   },
   auth: true,
+  endpoints: [registerEndpoint],
   fields: [
     {
       name: 'name',

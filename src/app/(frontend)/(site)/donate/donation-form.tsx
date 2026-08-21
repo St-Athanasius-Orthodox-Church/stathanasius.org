@@ -234,7 +234,7 @@ export function DonationForm({ checkoutStatus, initialEarmark, portalURL }: Dona
                   href={portalURL}
                   className="font-semibold text-[#4169e1] underline underline-offset-4 hover:text-[#3151b7]"
                 >
-                  Manage existing subscriptions
+                  Manage existing donations
                 </a>
               </section>
             )}
