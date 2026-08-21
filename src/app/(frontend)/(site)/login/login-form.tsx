@@ -2,7 +2,6 @@
 
 import { CircleCheckIcon, TriangleAlertIcon } from 'lucide-react'
 import Link from 'next/link'
-import { useSearchParams } from 'next/navigation'
 import { useActionState } from 'react'
 
 import { loginAction } from '@/app/(frontend)/(site)/actions/auth'
@@ -13,9 +12,7 @@ import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 
-export function LoginForm() {
-  const searchParams = useSearchParams()
-  const registered = searchParams.get('registered') === 'true'
+export function LoginForm({ registered }: { registered: boolean }) {
   const [state, formAction, isPending] = useActionState(loginAction, {})
 
   return (

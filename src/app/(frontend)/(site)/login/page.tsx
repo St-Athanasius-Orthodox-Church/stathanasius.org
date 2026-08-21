@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import { Suspense } from 'react'
 
 import { Hero } from '@/components/ui/hero'
 
@@ -10,12 +9,16 @@ export const metadata: Metadata = {
   description: 'Sign in to your St. Athanasius parish account.',
 }
 
-export default function LoginPage() {
+type LoginPageProps = {
+  searchParams: Promise<{ registered?: string }>
+}
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
+  const { registered } = await searchParams
+
   return (
     <Hero size="fullPage" gradientIntensity="strong">
-      <Suspense fallback={null}>
-        <LoginForm />
-      </Suspense>
+      <LoginForm registered={registered === 'true'} />
     </Hero>
   )
 }
