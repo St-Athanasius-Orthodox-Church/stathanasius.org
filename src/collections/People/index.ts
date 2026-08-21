@@ -14,6 +14,7 @@ export const People: CollectionConfig = {
   },
   admin: {
     defaultColumns: ['name', 'title', 'updatedAt'],
+    hidden: ({ user }) => user?.role !== 'admin',
     useAsTitle: 'name',
   },
   fields: [

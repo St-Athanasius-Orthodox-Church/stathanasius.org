@@ -18,6 +18,7 @@ export const Posts: CollectionConfig<'posts'> = {
   },
   admin: {
     defaultColumns: ['title', 'publishedAt', '_status', 'updatedAt'],
+    hidden: ({ user }) => user?.role !== 'admin',
     useAsTitle: 'title',
   },
   versions: {

@@ -23,6 +23,7 @@ export async function SiteHeader() {
   }
 
   const isSignedIn = Boolean(user)
+  const hasAdminAccess = user?.role === 'admin' || user?.role === 'editor'
 
   let authLabel: string | null = null
   let authHref: string | null = null
@@ -36,21 +37,31 @@ export async function SiteHeader() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full bg-byzantine-blue shadow-lg">
-      <GoldSeparator variant="full" />
+    <>
+      {hasAdminAccess && (
+        <div className="w-full bg-black text-white">
+          <div className="container mx-auto flex justify-end px-4 py-1 font-crimson-pro text-sm">
+            <Link href="/admin">Edit Site Content</Link>
+          </div>
+        </div>
+      )}
 
-      <nav className="container relative mx-auto flex items-center gap-6 px-4 py-3 font-crimson-pro">
-        <Link href="/" className="block h-10 w-fit shrink-0 md:h-12">
-          <img
-            src={saocLogoUrl}
-            alt="St. Athanasius Orthodox Church"
-            className="h-full w-auto object-contain"
-          />
-        </Link>
+      <header className="sticky top-0 z-50 w-full bg-byzantine-blue shadow-lg">
+        <GoldSeparator variant="full" />
 
-        <DesktopNav authLabel={authLabel} authHref={authHref} />
-        <MobileNav authLabel={authLabel} authHref={authHref} />
-      </nav>
-    </header>
+        <nav className="container relative mx-auto flex items-center gap-6 px-4 py-3 font-crimson-pro">
+          <Link href="/" className="block h-10 w-fit shrink-0 md:h-12">
+            <img
+              src={saocLogoUrl}
+              alt="St. Athanasius Orthodox Church"
+              className="h-full w-auto object-contain"
+            />
+          </Link>
+
+          <DesktopNav authLabel={authLabel} authHref={authHref} />
+          <MobileNav authLabel={authLabel} authHref={authHref} />
+        </nav>
+      </header>
+    </>
   )
 }

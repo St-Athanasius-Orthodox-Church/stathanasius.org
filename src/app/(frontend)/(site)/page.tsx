@@ -79,12 +79,12 @@ export default async function Welcome() {
         <div className="mx-auto mb-10 h-0.5 w-16" style={{ background: 'var(--orthodox-gold)' }} />
 
         {recentItems.length === 0 ? null : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="-mx-4 flex snap-x snap-mandatory gap-6 overflow-x-auto px-4 pb-4 lg:mx-0 lg:grid lg:grid-cols-3 lg:overflow-visible lg:px-0 lg:pb-0">
             {recentItems.map((item) => (
               <Link
                 key={`${item.type}-${item.href}`}
                 href={item.href}
-                className="group overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-all duration-300 hover:border-orthodox-gold/50 hover:shadow-lg"
+                className="group w-[85%] shrink-0 snap-start overflow-hidden rounded-lg border border-border bg-card shadow-sm transition-all duration-300 hover:border-orthodox-gold/50 hover:shadow-lg sm:w-[calc((100%-1.5rem)/2)] lg:w-auto"
                 target="_blank"
               >
                 <div className="relative aspect-[16/9] overflow-hidden bg-muted">
