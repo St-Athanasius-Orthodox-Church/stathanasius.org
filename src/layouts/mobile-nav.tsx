@@ -2,9 +2,9 @@
 
 import Link from 'next/link'
 import { ChevronDown, MenuIcon, XIcon } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
+import { logoutAction } from '@/app/(frontend)/(site)/actions/auth'
 import { navItems } from '@/layouts/nav-items'
 
 type MobileNavProps = {
@@ -13,7 +13,6 @@ type MobileNavProps = {
 }
 
 export function MobileNav({ authLabel, authHref }: MobileNavProps) {
-  const router = useRouter()
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [expandedSection, setExpandedSection] = useState<string | null>(null)
 
@@ -24,19 +23,6 @@ export function MobileNav({ authLabel, authHref }: MobileNavProps) {
   const closeMobileMenu = () => {
     setMobileMenuOpen(false)
     setExpandedSection(null)
-  }
-
-  const handleSignOut = async () => {
-    closeMobileMenu()
-    try {
-      await fetch('/api/users/logout', {
-        method: 'POST',
-        credentials: 'include',
-      })
-    } finally {
-      router.push('/')
-      router.refresh()
-    }
   }
 
   return (
@@ -105,13 +91,14 @@ export function MobileNav({ authLabel, authHref }: MobileNavProps) {
             )}
             {authLabel &&
               (authLabel === 'Sign Out' ? (
-                <button
-                  type="button"
-                  onClick={handleSignOut}
-                  className="px-6 py-3 text-left text-gray-100 hover:text-white"
-                >
-                  {authLabel}
-                </button>
+                <form action={logoutAction}>
+                  <button
+                    type="submit"
+                    className="px-6 py-3 text-left text-gray-100 hover:text-white"
+                  >
+                    {authLabel}
+                  </button>
+                </form>
               ) : (
                 authHref && (
                   <Link

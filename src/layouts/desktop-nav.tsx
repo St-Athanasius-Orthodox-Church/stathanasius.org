@@ -2,8 +2,8 @@
 
 import Link from 'next/link'
 import { ChevronDown } from 'lucide-react'
-import { useRouter } from 'next/navigation'
 
+import { logoutAction } from '@/app/(frontend)/(site)/actions/auth'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,19 +18,6 @@ type DesktopNavProps = {
 }
 
 export function DesktopNav({ authLabel, authHref }: DesktopNavProps) {
-  const router = useRouter()
-
-  const handleSignOut = async () => {
-    try {
-      await fetch('/api/users/logout', {
-        method: 'POST',
-        credentials: 'include',
-      })
-    } finally {
-      router.push('/')
-      router.refresh()
-    }
-  }
   return (
     <div className="hidden lg:ml-auto lg:flex lg:items-center md:gap-1">
       {navItems.map((item) =>
@@ -61,13 +48,14 @@ export function DesktopNav({ authLabel, authHref }: DesktopNavProps) {
       )}
       {authLabel &&
         (authLabel === 'Sign Out' ? (
-          <button
-            type="button"
-            onClick={handleSignOut}
-            className="rounded px-4 py-2 font-medium tracking-wide text-gray-100 transition-all duration-200 hover:bg-white/10 hover:text-white"
-          >
-            {authLabel}
-          </button>
+          <form action={logoutAction}>
+            <button
+              type="submit"
+              className="rounded px-4 py-2 font-medium tracking-wide text-gray-100 transition-all duration-200 hover:bg-white/10 hover:text-white"
+            >
+              {authLabel}
+            </button>
+          </form>
         ) : (
           authHref && (
             <Link

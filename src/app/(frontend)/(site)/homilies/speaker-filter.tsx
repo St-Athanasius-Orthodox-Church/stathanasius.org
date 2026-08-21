@@ -1,7 +1,5 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-
 import { NativeSelect, NativeSelectOption } from '@/components/ui/native-select'
 
 type SpeakerFilterProps = {
@@ -10,8 +8,6 @@ type SpeakerFilterProps = {
 }
 
 export function SpeakerFilter({ speakers, selectedSpeaker }: SpeakerFilterProps) {
-  const router = useRouter()
-
   return (
     <form action="/homilies" method="get" className="mb-6 flex items-center gap-4">
       <label htmlFor="speaker-filter" className="text-sm font-medium text-byzantine-blue">
@@ -22,12 +18,7 @@ export function SpeakerFilter({ speakers, selectedSpeaker }: SpeakerFilterProps)
         name="speaker"
         defaultValue={selectedSpeaker}
         className="w-[250px]"
-        onChange={(event) => {
-          const speaker = event.currentTarget.value
-          router.push(
-            speaker === 'all' ? '/homilies' : `/homilies?speaker=${encodeURIComponent(speaker)}`,
-          )
-        }}
+        onChange={(event) => event.currentTarget.form?.requestSubmit()}
       >
         <NativeSelectOption value="all">All speakers</NativeSelectOption>
         {speakers.map((speaker) => (
@@ -36,6 +27,11 @@ export function SpeakerFilter({ speakers, selectedSpeaker }: SpeakerFilterProps)
           </NativeSelectOption>
         ))}
       </NativeSelect>
+      <noscript>
+        <button type="submit" className="text-sm font-medium text-byzantine-blue underline">
+          Apply
+        </button>
+      </noscript>
     </form>
   )
 }

@@ -14,6 +14,25 @@ vi.mock('@/lib/stripe', () => ({
   getStripe: () => ({ checkout: { sessions: { create: createSession } } }),
 }))
 
+// Server functions call redirect() to send the donor to Stripe's hosted page.
+// The real redirect throws a special error; mimic that so actions can be
+// asserted on outside a Next.js request context.
+const redirectMock = vi.hoisted(() => vi.fn())
+
+vi.mock('next/navigation', () => ({
+  redirect: redirectMock,
+}))
+
+function donationFormData(donation: Record<string, string>): FormData {
+  const formData = new FormData()
+
+  for (const [key, value] of Object.entries(donation)) {
+    formData.set(key, value)
+  }
+
+  return formData
+}
+
 const validDonation = {
   amount: '25.00',
   frequency: 'one-time' as const,
@@ -196,70 +215,58 @@ describe('Checkout Session verification', () => {
   })
 })
 
-describe('checkout API', () => {
+describe('checkout server function', () => {
   beforeEach(() => {
     process.env.NEXT_PUBLIC_SERVER_URL = 'https://example.com'
     createSession.mockReset()
+    redirectMock.mockReset()
+    redirectMock.mockImplementation((url: string) => {
+      throw new Error(`NEXT_REDIRECT:${url}`)
+    })
   })
 
   afterEach(() => {
     vi.restoreAllMocks()
   })
 
-  it('returns the Stripe-hosted Checkout URL', async () => {
+  it('redirects to the Stripe-hosted Checkout URL', async () => {
     createSession.mockResolvedValue({ url: 'https://checkout.stripe.com/test' })
-    const { POST } = await import('@/app/(frontend)/api/stripe/checkout/route')
-    const response = await POST(
-      new Request('https://example.com/api/stripe/checkout', {
-        method: 'POST',
-        body: JSON.stringify(validDonation),
-      }),
-    )
+    const { startCheckout } = await import('@/app/(frontend)/(site)/donate/actions')
 
-    expect(response.status).toBe(200)
-    await expect(response.json()).resolves.toEqual({ url: 'https://checkout.stripe.com/test' })
+    await expect(
+      startCheckout({}, donationFormData(validDonation)),
+    ).rejects.toThrow('NEXT_REDIRECT:https://checkout.stripe.com/test')
+    expect(redirectMock).toHaveBeenCalledWith('https://checkout.stripe.com/test')
   })
 
-  it('returns 400 for invalid form submissions without calling Stripe', async () => {
-    const { POST } = await import('@/app/(frontend)/api/stripe/checkout/route')
-    const response = await POST(
-      new Request('https://example.com/api/stripe/checkout', {
-        method: 'POST',
-        body: JSON.stringify({ ...validDonation, amount: '0.50' }),
-      }),
-    )
+  it('returns an error for invalid form submissions without calling Stripe', async () => {
+    const { startCheckout } = await import('@/app/(frontend)/(site)/donate/actions')
+    const result = await startCheckout({}, donationFormData({ ...validDonation, amount: '0.50' }))
 
-    expect(response.status).toBe(400)
+    expect(result).toEqual({ error: 'Invalid donation details.' })
     expect(createSession).not.toHaveBeenCalled()
   })
 
-  it('returns 400 for malformed JSON without calling Stripe', async () => {
-    const { POST } = await import('@/app/(frontend)/api/stripe/checkout/route')
-    const response = await POST(
-      new Request('https://example.com/api/stripe/checkout', {
-        method: 'POST',
-        body: '{invalid',
-      }),
+  it('returns an error for a missing amount without calling Stripe', async () => {
+    const { startCheckout } = await import('@/app/(frontend)/(site)/donate/actions')
+    const result = await startCheckout(
+      {},
+      donationFormData({ frequency: 'one-time', earmark: 'General Donation' }),
     )
 
-    expect(response.status).toBe(400)
+    expect(result).toEqual({ error: 'Invalid donation details.' })
     expect(createSession).not.toHaveBeenCalled()
   })
 
-  it('logs Stripe failures and returns a generic 500 response', async () => {
+  it('logs Stripe failures and returns a generic error', async () => {
     const stripeError = new Error('Sensitive Stripe failure')
     createSession.mockRejectedValue(stripeError)
     const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => undefined)
-    const { POST } = await import('@/app/(frontend)/api/stripe/checkout/route')
-    const response = await POST(
-      new Request('https://example.com/api/stripe/checkout', {
-        method: 'POST',
-        body: JSON.stringify(validDonation),
-      }),
-    )
+    const { startCheckout } = await import('@/app/(frontend)/(site)/donate/actions')
+    const result = await startCheckout({}, donationFormData(validDonation))
 
-    expect(response.status).toBe(500)
-    expect(await response.json()).toEqual({ error: 'Unable to start secure checkout.' })
+    expect(result).toEqual({ error: 'Secure checkout could not be started. Please try again.' })
+    expect(redirectMock).not.toHaveBeenCalled()
     expect(errorSpy).toHaveBeenCalledWith('Unable to create Stripe Checkout Session:', stripeError)
   })
 })

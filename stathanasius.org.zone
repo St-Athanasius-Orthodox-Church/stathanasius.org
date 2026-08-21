@@ -1,0 +1,27 @@
+$ORIGIN stathanasius.org.
+$TTL 3600
+
+@ IN A 167.99.26.193
+preview IN A 167.99.26.193
+www IN A 167.99.26.193
+28273830 IN CNAME sendgrid.net.
+em6267 IN CNAME u28273830.wl081.sendgrid.net.
+email IN CNAME ghs.google.com.
+k2._domainkey IN CNAME dkim2.mcsv.net.
+k3._domainkey IN CNAME dkim3.mcsv.net.
+mta IN CNAME mailersend.net.
+s1._domainkey IN CNAME s1.domainkey.u28273830.wl081.sendgrid.net.
+s2._domainkey IN CNAME s2.domainkey.u28273830.wl081.sendgrid.net.
+url6919 IN CNAME sendgrid.net.
+@ IN TXT "v=spf1 include:_spf.mailersend.net ~all"
+mlsend._domainkey IN TXT "v=DKIM1;t=s;p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQC03IltRoLITfcU4r14r7mOCmAkf4tY1IlTNVs9YwibJ3XHadxr7MRH7xyCpzkHyfckdHVrb5NXBrlOuTTdDyuWHslEIiXwVIV7VvYP6xU6Gyrm82c3S8+glVRtseut14qi1Ca/uh1+JZdXjaUACVmBK4kjyLMjQ353lU+i1L14QwIDAQAB"
+_dmarc IN TXT "v=DMARC1; p=none;"
+mysql IN A 208.113.246.106
+@ IN MX 20 ALT1.ASPMX.L.GOOGLE.COM.
+@ IN MX 20 ALT2.ASPMX.L.GOOGLE.COM.
+@ IN MX 30 ASPMX2.GOOGLEMAIL.COM.
+@ IN MX 30 ASPMX3.GOOGLEMAIL.COM.
+@ IN MX 30 ASPMX4.GOOGLEMAIL.COM.
+@ IN MX 30 ASPMX5.GOOGLEMAIL.COM.
+@ IN MX 10 ASPMX.L.GOOGLE.COM.
+mail IN CNAME ghs.googlehosted.com.

@@ -1,9 +1,9 @@
 'use client'
 
 import { CircleCheckIcon, CircleXIcon, ClockIcon, TriangleAlertIcon } from 'lucide-react'
-import { useState } from 'react'
-import type { FormEvent } from 'react'
+import { useActionState } from 'react'
 
+import { startCheckout } from '@/app/(frontend)/(site)/donate/actions'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -30,48 +30,7 @@ type DonationFormProps = {
 }
 
 export function DonationForm({ checkoutStatus, initialEarmark, portalURL }: DonationFormProps) {
-  const [data, setData] = useState({
-    amount: '',
-    frequency: 'one-time',
-    earmark: resolveEarmark(initialEarmark),
-    comments: '',
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submissionError, setSubmissionError] = useState<string>()
-
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    setIsSubmitting(true)
-    setSubmissionError(undefined)
-
-    try {
-      const response = await fetch('/api/stripe/checkout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data),
-      })
-      const result: unknown = await response.json()
-
-      if (
-        !response.ok ||
-        typeof result !== 'object' ||
-        result === null ||
-        !('url' in result) ||
-        typeof result.url !== 'string'
-      ) {
-        throw new Error('Checkout Session creation failed.')
-      }
-
-      window.location.assign(result.url)
-    } catch {
-      setSubmissionError('Secure checkout could not be started. Please try again.')
-      setIsSubmitting(false)
-    }
-  }
-
-  function setField<K extends keyof typeof data>(key: K, value: (typeof data)[K]) {
-    setData((previous) => ({ ...previous, [key]: value }))
-  }
+  const [state, formAction, isPending] = useActionState(startCheckout, {})
 
   return (
     <Card variant="orthodox" goldBorderTop className="w-full max-w-lg mx-auto gap-4 rounded-lg">
@@ -135,7 +94,7 @@ export function DonationForm({ checkoutStatus, initialEarmark, portalURL }: Dona
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
+        <form action={formAction} className="space-y-8">
           <FieldGroup>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field>
@@ -144,12 +103,11 @@ export function DonationForm({ checkoutStatus, initialEarmark, portalURL }: Dona
                 </FieldLabel>
                 <Input
                   id="amount"
+                  name="amount"
                   type="number"
                   min={MIN_DONATION_CENTS / 100}
                   max={MAX_DONATION_CENTS / 100}
                   step="0.01"
-                  value={data.amount}
-                  onChange={(event) => setField('amount', event.target.value)}
                   placeholder="$0.00"
                   required
                 />
@@ -161,8 +119,8 @@ export function DonationForm({ checkoutStatus, initialEarmark, portalURL }: Dona
                 </FieldLabel>
                 <NativeSelect
                   id="frequency"
-                  value={data.frequency}
-                  onChange={(event) => setField('frequency', event.target.value)}
+                  name="frequency"
+                  defaultValue="one-time"
                   required
                   wrapperClassName="w-full"
                   className="w-full"
@@ -182,8 +140,8 @@ export function DonationForm({ checkoutStatus, initialEarmark, portalURL }: Dona
               </FieldLabel>
               <NativeSelect
                 id="earmark"
-                value={data.earmark}
-                onChange={(event) => setField('earmark', resolveEarmark(event.target.value))}
+                name="earmark"
+                defaultValue={resolveEarmark(initialEarmark)}
                 required
                 wrapperClassName="w-full"
                 className="w-full"
@@ -202,18 +160,17 @@ export function DonationForm({ checkoutStatus, initialEarmark, portalURL }: Dona
               </FieldLabel>
               <Textarea
                 id="comments"
-                value={data.comments}
-                onChange={(event) => setField('comments', event.target.value)}
+                name="comments"
                 maxLength={DONATION_NOTES_MAX_LENGTH}
                 rows={4}
               />
             </Field>
 
-            {submissionError && (
+            {state.error && (
               <Alert variant="destructive">
                 <TriangleAlertIcon />
                 <AlertTitle>Unable to Continue</AlertTitle>
-                <AlertDescription>{submissionError}</AlertDescription>
+                <AlertDescription>{state.error}</AlertDescription>
               </Alert>
             )}
 
@@ -222,10 +179,10 @@ export function DonationForm({ checkoutStatus, initialEarmark, portalURL }: Dona
               variant="byzantineGold"
               size="lg"
               className="w-full"
-              disabled={isSubmitting}
+              disabled={isPending}
             >
-              {isSubmitting && <Spinner />}
-              {isSubmitting ? 'Opening secure checkout...' : 'Continue to secure checkout'}
+              {isPending && <Spinner />}
+              {isPending ? 'Opening secure checkout...' : 'Continue to secure checkout'}
             </Button>
 
             {portalURL && (

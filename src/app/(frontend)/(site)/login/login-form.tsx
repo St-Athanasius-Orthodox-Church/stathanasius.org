@@ -2,60 +2,21 @@
 
 import { CircleCheckIcon, TriangleAlertIcon } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
-import { useState } from 'react'
-import type { FormEvent } from 'react'
+import { useSearchParams } from 'next/navigation'
+import { useActionState } from 'react'
 
+import { loginAction } from '@/app/(frontend)/(site)/actions/auth'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 
 export function LoginForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const registered = searchParams.get('registered') === 'true'
-  const [data, setData] = useState({
-    email: '',
-    password: '',
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState<string>()
-
-  function setField<K extends keyof typeof data>(key: K, value: (typeof data)[K]) {
-    setData((prev) => ({ ...prev, [key]: value }))
-  }
-
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault()
-    setError(undefined)
-    setIsSubmitting(true)
-
-    try {
-      const res = await fetch('/api/users/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-        }),
-      })
-
-      const json = await res.json()
-
-      if (!res.ok) {
-        throw new Error(json.errors?.[0]?.message || json.message || 'Login failed')
-      }
-
-      router.push('/')
-      router.refresh()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
-      setIsSubmitting(false)
-    }
-  }
+  const [state, formAction, isPending] = useActionState(loginAction, {})
 
   return (
     <Card variant="orthodox" goldBorderTop className="mx-auto w-full max-w-md gap-4 rounded-lg">
@@ -74,7 +35,7 @@ export function LoginForm() {
           </Alert>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form action={formAction} className="space-y-6">
           <FieldGroup>
             <Field>
               <FieldLabel htmlFor="email" className="text-byzantine-blue">
@@ -82,9 +43,8 @@ export function LoginForm() {
               </FieldLabel>
               <Input
                 id="email"
+                name="email"
                 type="email"
-                value={data.email}
-                onChange={(e) => setField('email', e.target.value)}
                 placeholder="you@example.com"
                 required
                 autoComplete="email"
@@ -97,20 +57,19 @@ export function LoginForm() {
               </FieldLabel>
               <Input
                 id="password"
+                name="password"
                 type="password"
-                value={data.password}
-                onChange={(e) => setField('password', e.target.value)}
                 placeholder="Your password"
                 required
                 autoComplete="current-password"
               />
             </Field>
 
-            {error && (
+            {state.error && (
               <Alert variant="destructive">
                 <TriangleAlertIcon />
                 <AlertTitle>Sign in failed</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
+                <AlertDescription>{state.error}</AlertDescription>
               </Alert>
             )}
 
@@ -119,10 +78,10 @@ export function LoginForm() {
               variant="byzantineGold"
               size="lg"
               className="w-full"
-              disabled={isSubmitting}
+              disabled={isPending}
             >
-              {isSubmitting && <Spinner />}
-              {isSubmitting ? 'Signing in...' : 'Sign in'}
+              {isPending && <Spinner />}
+              {isPending ? 'Signing in...' : 'Sign in'}
             </Button>
 
             <p className="text-center text-sm text-byzantine-blue/70">

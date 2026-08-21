@@ -2,7 +2,6 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../../access/authenticated'
 import { editorOrUp } from '../../access/editorOrUp'
-import { registerEndpoint } from './endpoints/register'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -21,7 +20,6 @@ export const Users: CollectionConfig = {
   auth: {
     tokenExpiration: 60 * 60 * 24 * 365 * 2,
   },
-  endpoints: [registerEndpoint],
   fields: [
     {
       name: 'name',
