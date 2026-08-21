@@ -23,7 +23,7 @@ export const navItems: NavItem[] = [
   {
     label: 'Media',
     children: [
-      { label: 'Blog', href: '/blog' },
+      // { label: 'Blog', href: '/blog' },
       { label: 'Photos', href: '/photo-albums' },
       { label: 'Homilies & Lectures', href: '/homilies' },
       { label: 'Bulletins', href: '/bulletins' },
