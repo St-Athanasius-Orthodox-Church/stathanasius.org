@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 
 import { Hero } from '@/components/ui/hero'
@@ -19,12 +20,14 @@ function ClergyCard({ member }: { member: ClergyMember }) {
   const content = (
     <>
       <div className="shrink-0">
-        <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-orthodox-gold/30 bg-byzantine-blue/5 shadow-sm">
+        <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border-2 border-orthodox-gold/30 bg-byzantine-blue/5 shadow-sm">
           {member.image ? (
-            <img
+            <Image
               src={member.image}
               alt={member.name}
-              className="h-full w-full object-cover object-top"
+              fill
+              sizes="80px"
+              className="object-cover object-top"
             />
           ) : (
             <svg
@@ -96,10 +99,13 @@ export default function ClergyIndex() {
 
       <section className="container mx-auto max-w-4xl px-4 pt-12">
         <div className="overflow-hidden rounded-lg shadow-lg">
-          <img
+          <Image
             src={clergyGroupUrl}
             alt="Clergy and servers of St. Athanasius Orthodox Church"
-            className="w-full object-cover"
+            width={600}
+            height={437}
+            sizes="(max-width: 896px) 100vw, 896px"
+            className="h-auto w-full object-cover"
           />
         </div>
         <p className="mt-3 text-center text-sm text-byzantine-blue/60">

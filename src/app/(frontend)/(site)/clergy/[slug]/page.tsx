@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import Image from 'next/image'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -61,12 +62,14 @@ export default async function ClergyShow({ params }: PageProps) {
 
         <article className="flex flex-col gap-8 md:flex-row md:gap-12">
           <div className="shrink-0">
-            <div className="mx-auto flex h-48 w-48 items-center justify-center overflow-hidden rounded-lg border-2 border-orthodox-gold/30 bg-byzantine-blue/5 shadow-md md:mx-0">
+            <div className="relative mx-auto flex h-48 w-48 items-center justify-center overflow-hidden rounded-lg border-2 border-orthodox-gold/30 bg-byzantine-blue/5 shadow-md md:mx-0">
               {member.image ? (
-                <img
+                <Image
                   src={member.image}
                   alt={member.name}
-                  className="h-full w-full object-cover object-top"
+                  fill
+                  sizes="192px"
+                  className="object-cover object-top"
                 />
               ) : (
                 <svg
