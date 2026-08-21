@@ -25,9 +25,29 @@ const preachUrl = '/assets/preach.jpg'
 const theophanyUrl = '/assets/theophany.jpg'
 
 export const metadata: Metadata = {
-  title: 'Welcome',
+  title: 'Welcome - St. Athanasius Orthodox Church',
   description:
     'St. Athanasius Antiochian Orthodox Church in Santa Barbara, CA. Join us for Divine Liturgy, learn about Orthodox Christianity, and become part of our community.',
+  alternates: {
+    canonical: '/',
+  },
+  openGraph: {
+    type: 'website',
+    siteName: 'St. Athanasius Orthodox Church',
+    title: 'Welcome - St. Athanasius Orthodox Church',
+    description:
+      'St. Athanasius Antiochian Orthodox Church in Santa Barbara, CA. Join us for Divine Liturgy, learn about Orthodox Christianity, and become part of our community.',
+    url: '/',
+    images: ['/og-image.jpg'],
+    locale: 'en_US',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Welcome - St. Athanasius Orthodox Church',
+    description:
+      'St. Athanasius Antiochian Orthodox Church in Santa Barbara, CA. Join us for Divine Liturgy, learn about Orthodox Christianity, and become part of our community.',
+    images: ['/og-image.jpg'],
+  },
 }
 
 export const revalidate = 600
