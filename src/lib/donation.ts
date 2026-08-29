@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 export const EARMARK_OPTIONS = [
   'General Donation',
+  'Special Collection',
   'Tithe',
   'Temple Fund',
   "Pastor's Fund",

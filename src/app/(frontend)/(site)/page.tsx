@@ -277,9 +277,9 @@ export default async function Welcome() {
                 </p>
                 <p>
                   The Orthodox Church traces its origin back to Jesus Christ and His Apostles and
-                  came into the fullness of its life on Pentecost, 50 days after Jesus Christ's
+                  came into the fullness of its life on Pentecost, 50 days after Jesus Christ’s
                   defeat of death by His rising from the dead. We are part of the unbroken chain of
-                  the Apostles' laying on of hands from one Bishop to the next as they established
+                  the Apostles’ laying on of hands from one Bishop to the next as they established
                   communities that worship, fellowship, serve, and grow in discipleship throughout
                   the world. Today there are over 250 million Eastern Orthodox Christians throughout
                   the world and over 1.5 million in the United States who gather in some 2800
@@ -290,9 +290,11 @@ export default async function Welcome() {
 
             <div className="flex-1">
               <div className="relative overflow-hidden rounded-lg shadow-xl">
-                <img
+                <Image
                   src={theophanyUrl}
                   alt="What is the Orthodox Church?"
+                  width={800}
+                  height={1200}
                   className="h-auto w-full"
                 />
                 <div
@@ -327,7 +329,13 @@ export default async function Welcome() {
 
             <div className="flex-1">
               <div className="relative overflow-hidden rounded-lg shadow-xl">
-                <img src={fr1Url} alt="What will I see?" className="h-auto w-full" />
+                <Image
+                  src={fr1Url}
+                  alt="What will I see?"
+                  width={1600}
+                  height={1067}
+                  className="h-auto w-full"
+                />
                 <div
                   className="absolute inset-0 rounded-lg ring-1 ring-inset"
                   style={{
@@ -354,15 +362,15 @@ export default async function Welcome() {
                   dead during the reign of Pontius Pilate.
                 </p>
                 <p>
-                  We believe in the scriptures of the Old and New Testament as the record of God's
+                  We believe in the scriptures of the Old and New Testament as the record of God’s
                   works with His People and understand them through the activity of the Holy Spirit
                   who preserves and guides unchanging Tradition of the Church. We believe that the
-                  Tradition is Holy and is the life of God's people and unites us believers
+                  Tradition is Holy and is the life of God’s people and unites us believers
                   throughout time. All of these attest to our salvation in Jesus Christ.
                 </p>
                 <p>
                   We believe that the Church is One Holy Catholic and Apostolic and preserved by the
-                  promise of Jesus Christ that "the gates of hell will not prevail against it."
+                  promise of Jesus Christ that “the gates of hell will not prevail against it.”
                 </p>
                 <p>
                   We believe that the Church is where we are able to work out our salvation in Jesus
@@ -376,7 +384,13 @@ export default async function Welcome() {
             </div>
             <div className="flex-1">
               <div className="relative overflow-hidden rounded-lg shadow-xl">
-                <img src={preachUrl} alt="What we believe" className="h-auto w-full" />
+                <Image
+                  src={preachUrl}
+                  alt="What we believe"
+                  width={1404}
+                  height={936}
+                  className="h-auto w-full"
+                />
                 <div
                   className="absolute inset-0 rounded-lg ring-1 ring-inset"
                   style={{
@@ -419,7 +433,13 @@ export default async function Welcome() {
 
             <div className="flex-1">
               <div className="relative overflow-hidden rounded-lg shadow-xl">
-                <img src={bishopUrl} alt="What will I see?" className="h-auto w-full" />
+                <Image
+                  src={bishopUrl}
+                  alt="What will I see?"
+                  width={1404}
+                  height={936}
+                  className="h-auto w-full"
+                />
                 <div
                   className="absolute inset-0 rounded-lg ring-1 ring-inset"
                   style={{

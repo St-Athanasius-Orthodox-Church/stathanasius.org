@@ -1,5 +1,6 @@
 const heroUrl = '/assets/hero.jpg'
 import type * as React from 'react'
+import Image from 'next/image'
 
 import { GoldSeparator } from '@/components/ui/gold-separator'
 import { cn } from '@/lib/utils'
@@ -71,10 +72,13 @@ function Hero({
       )}
     >
       {/* Background Image */}
-      <img
+      <Image
         src={backgroundImage}
         alt="St. Athanasius Orthodox Church"
-        className="absolute top-0 left-0 h-full w-full object-cover"
+        fill
+        priority
+        sizes="100vw"
+        className="object-cover"
       />
 
       {/* Gradient Overlay */}

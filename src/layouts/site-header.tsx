@@ -1,6 +1,7 @@
 import { getPayload } from 'payload'
-import Link from 'next/link'
 import { headers as getHeaders } from 'next/headers'
+import Image from 'next/image'
+import Link from 'next/link'
 
 import { GoldSeparator } from '@/components/ui/gold-separator'
 import { DesktopNav } from '@/layouts/desktop-nav'
@@ -13,9 +14,14 @@ import type { User } from '@/payload-types'
 export async function SiteHeader() {
   let user: User | null = null
 
+  // Dynamic API calls must stay outside the try/catch: swallowing the error Next
+  // throws while prerendering would hide the "bail out to dynamic rendering"
+  // signal and leave pages incorrectly baked as static (leading to
+  // "Page changed from static to dynamic at runtime" errors in production).
+  const headersList = await getHeaders()
+
   try {
     const payload = await getPayload({ config: await config })
-    const headersList = await getHeaders()
     const result = await payload.auth({ headers: headersList })
     user = result.user as User | null
   } catch {
@@ -51,9 +57,12 @@ export async function SiteHeader() {
 
         <nav className="container relative mx-auto flex items-center gap-6 px-4 py-3 font-crimson-pro">
           <Link href="/" className="block h-10 w-fit shrink-0 md:h-12">
-            <img
+            <Image
               src={saocLogoUrl}
               alt="St. Athanasius Orthodox Church"
+              width={327}
+              height={51}
+              priority
               className="h-full w-auto object-contain"
             />
           </Link>
