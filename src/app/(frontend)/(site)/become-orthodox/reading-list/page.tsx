@@ -20,13 +20,59 @@ export default function ReadingList() {
           <div className="mb-12">
             <div className="mb-6">
               <h3 className="mb-3 text-xl font-semibold">
-                Further Catechetical Reading
+                Required Reading for Inquirers and Catechumens
               </h3>
               <ul className="list-disc space-y-2 pl-6 leading-relaxed">
                 <li>
-                  <em>The Orthodox Faith, Worship, and Life</em> by Hieromonk
-                  Gregorios of Koutloumousiou
+                  <em>The Scriptures</em>: Begin with{' '}
+                  <em>The Gospel According to St. Luke</em>,{' '}
+                  <em>The Book of Acts</em>, <em>Genesis</em>,{' '}
+                  <em>Exodus</em>, then{' '}
+                  <em>The Gospel According to St. John</em>, even if you have
+                  read them before then continue on with the Epistles of the
+                  New Testament and the rest of the Old Testament. Reading a
+                  chapter a day to get started.
                 </li>
+                <li>
+                  <em>The Orthodox Faith, Worship, and Life</em> by Hieromonk
+                  Gregorios of Koutloumousiou is the foundation of our
+                  Catechism classes.
+                </li>
+                <li>
+                  <em>Journey to Reality: Sacramental Life in a Secular Age</em>{' '}
+                  by Zachary Porcu is an introduction to worldview of the
+                  Church in contrast to our secular age.
+                </li>
+                <li>
+                  <em>Come, Let us Worship</em> by Fr. Patrick O&apos;Grady
+                  will guide you through the Divine Liturgy and participating
+                  in it.
+                </li>
+                <li>
+                  <em>If we Confess our Sins</em> by Fr. Thomas Hopko will be
+                  given to you to prepare for making your first confession,
+                  which we call a life confession.
+                </li>
+                <li>
+                  <em>When You Fast: The Why and How of Christian
+                  Self-Discipline</em>{' '}
+                  by L. Joseph Letendre
+                </li>
+                <li>
+                  <em>
+                    When You Pray: A Practical Guide to an Orthodox Life of
+                    Prayer
+                  </em>{' '}
+                  by L. Joseph Letendre
+                </li>
+              </ul>
+            </div>
+
+            <div className="mb-6">
+              <h3 className="mb-3 text-xl font-semibold">
+                Further Catechetical Reading
+              </h3>
+              <ul className="list-disc space-y-2 pl-6 leading-relaxed">
                 <li>
                   <em>The Truth of our Faith: Volumes 1 & 2</em> by Elder
                   Cleopas of Siharistia, a great resource which offers the
@@ -102,9 +148,6 @@ export default function ReadingList() {
                 For Understanding Orthodox Liturgical Life
               </h3>
               <ul className="list-disc space-y-2 pl-6 leading-relaxed">
-                <li>
-                  <em>Come, Let us Worship</em> by Fr. Patrick O&apos;Grady
-                </li>
                 <li>
                   <em>
                     The Divine Liturgy: A Commentary in the Light of the Fathers
