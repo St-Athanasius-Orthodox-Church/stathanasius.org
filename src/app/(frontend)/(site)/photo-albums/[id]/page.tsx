@@ -44,8 +44,12 @@ export async function generateMetadata({
       title: `${album.title} - St. Athanasius Orthodox Church`,
       description: `Photos from ${album.title} at St. Athanasius Orthodox Church.`,
       url: `/photo-albums/${id}`,
-      images: album.photos[0]?.carousel_url
-        ? [{ url: album.photos[0].carousel_url }]
+      // NOTE: use the direct media URL, never an `/_next/image` optimizer URL.
+      // Scrapers (e.g. Facebook's meta-externalagent) fetch og:image on every
+      // share, and each optimizer-URL fetch bills a Vercel Image Optimization
+      // transform. The source file is served statically instead.
+      images: album.photos[0]?.thumbnail_url
+        ? [{ url: album.photos[0].thumbnail_url }]
         : undefined,
     }),
   }

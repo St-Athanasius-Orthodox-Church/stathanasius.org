@@ -12,8 +12,14 @@ module.exports = {
     policies: [
       {
         userAgent: '*',
-        disallow: '/admin/*',
+        disallow: ['/admin/*', '/_next/'],
       },
+      ...['GPTBot', 'ChatGPT-User', 'CCBot', 'anthropic-ai', 'ClaudeBot', 'Omgilibot'].map(
+        (userAgent) => ({
+          userAgent,
+          disallow: '/',
+        }),
+      ),
     ],
     additionalSitemaps: [],
   },

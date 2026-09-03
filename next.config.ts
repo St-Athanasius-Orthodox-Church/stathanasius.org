@@ -30,6 +30,10 @@ const nextConfig: NextConfig = {
       },
     ],
     qualities: [75, 100],
+    // Source URLs embed the media `updatedAt` as a cache-buster, so a long
+    // TTL is safe and keeps repeat scraper hits on the edge cache instead of
+    // re-running (and re-billing) the optimizer.
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [
       ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
         const url = new URL(item)
