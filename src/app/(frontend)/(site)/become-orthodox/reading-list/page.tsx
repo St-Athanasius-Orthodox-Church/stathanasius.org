@@ -29,9 +29,10 @@ export default function ReadingList() {
                   <em>The Book of Acts</em>, <em>Genesis</em>,{' '}
                   <em>Exodus</em>, then{' '}
                   <em>The Gospel According to St. John</em>, even if you have
-                  read them before then continue on with the Epistles of the
-                  New Testament and the rest of the Old Testament. Reading a
-                  chapter a day to get started.
+                  read them before. After this start reading the Epistles of
+                  the New Testament and then the rest of the Old Testament,
+                  particularly the Histories and Prophets. A good way to get
+                  started is to read a chapter a day.
                 </li>
                 <li>
                   <em>The Orthodox Faith, Worship, and Life</em> by Hieromonk
@@ -40,8 +41,8 @@ export default function ReadingList() {
                 </li>
                 <li>
                   <em>Journey to Reality: Sacramental Life in a Secular Age</em>{' '}
-                  by Zachary Porcu is an introduction to worldview of the
-                  Church in contrast to our secular age.
+                  by Zachary Porcu is an introduction to the Church&apos;s
+                  worldview in contrast to our secular age.
                 </li>
                 <li>
                   <em>Come, Let us Worship</em> by Fr. Patrick O&apos;Grady
