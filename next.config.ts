@@ -30,6 +30,13 @@ const nextConfig: NextConfig = {
       },
     ],
     qualities: [75, 100],
+    // Narrowed from Next defaults (8 device + 8 image sizes) to cut the
+    // worst-case unique `url/w/q` optimizer variants per photo from 16 to 6.
+    // 640 covers mobile 100vw, 1080 covers 50vw/cards/896px heroes, 1920 is
+    // required by `getOptimizedImageUrl` lightbox URLs. 96 covers 80px
+    // avatars, 256/384 cover gallery thumbnails (20-33vw).
+    deviceSizes: [640, 1080, 1920],
+    imageSizes: [96, 256, 384],
     // Source URLs embed the media `updatedAt` as a cache-buster, so a long
     // TTL is safe and keeps repeat scraper hits on the edge cache instead of
     // re-running (and re-billing) the optimizer.
