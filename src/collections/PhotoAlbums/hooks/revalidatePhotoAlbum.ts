@@ -6,11 +6,9 @@ import type { PhotoAlbum } from '../../../payload-types'
 
 export const revalidatePhotoAlbum: CollectionAfterChangeHook<PhotoAlbum> = ({
   doc,
-  req: { payload, context },
+  req: { context },
 }) => {
   if (!context.disableRevalidate) {
-    payload.logger.info(`Revalidating photo albums at /photo-albums/${doc.id}`)
-
     revalidatePath('/')
     revalidatePath('/photo-albums')
     revalidatePath(`/photo-albums/${doc.id}`)

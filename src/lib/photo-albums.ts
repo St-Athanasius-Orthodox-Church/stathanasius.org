@@ -4,7 +4,6 @@ import { cache } from 'react'
 
 import type { Media, PhotoAlbum } from '@/payload-types'
 import { getMediaUrl } from '@/utilities/getMediaUrl'
-import { getOptimizedImageUrl } from '@/utilities/getOptimizedImageUrl'
 
 export type PhotoAlbumSummary = {
   id: string
@@ -39,13 +38,20 @@ function getMediaImageUrl(media: Media): string | null {
   return media.url ? getMediaUrl(media.url, media.updatedAt) : null
 }
 
-function toPhoto(media: Media): Photo {
+function toPhoto(media: Media): Photo | null {
   const url = getMediaImageUrl(media)
 
+  // Drop photos with no URL: an empty `<Image src="">` throws at runtime
+  // (500s, wasted function invocations) instead of rendering nothing.
+  if (!url) return null
+
+  // COST: direct Blob/static URL, never an `/_next/image` optimizer URL.
+  // The optimizer billed a transform + cache write per MISS; the lightbox
+  // loads the same file the thumbnail uses, via CDN cache.
   return {
     id: String(media.id),
-    thumbnail_url: url || '',
-    carousel_url: url ? getOptimizedImageUrl(media.url, 1920, 75, media.updatedAt) : '',
+    thumbnail_url: url,
+    carousel_url: url,
   }
 }
 
@@ -70,6 +76,7 @@ function toPhotoAlbumDetail(album: PhotoAlbum): PhotoAlbumDetail {
   const photos = (album.photos || [])
     .filter((photo): photo is Media => typeof photo === 'object')
     .map(toPhoto)
+    .filter((photo): photo is Photo => photo !== null)
 
   return {
     id: String(album.id),

@@ -18,6 +18,13 @@ const nextConfig: NextConfig = {
     loadPaths: ['./node_modules/@payloadcms/ui/dist/scss/'],
   },
   images: {
+    // COST: `unoptimized: true` disables Vercel Image Optimization entirely.
+    // Every `<Image>` srcset variant used to bill a transform + cache write
+    // on every cache MISS (~37K `/_next/image` hits/day, ~80% MISS, almost
+    // all bot traffic). Direct Blob/static URLs ride the CDN instead, which
+    // has 1TB free on Pro. Re-enable only with Payload `imageSizes`
+    // pre-generated thumbnails + tight sizes/qualities.
+    unoptimized: true,
     localPatterns: [
       {
         pathname: '/api/media/file/**',
@@ -30,10 +37,9 @@ const nextConfig: NextConfig = {
       },
     ],
     qualities: [75, 100],
-    // Narrowed from Next defaults (8 device + 8 image sizes) to cut the
-    // worst-case unique `url/w/q` optimizer variants per photo from 16 to 6.
-    // 640 covers mobile 100vw, 1080 covers 50vw/cards/896px heroes, 1920 is
-    // required by `getOptimizedImageUrl` lightbox URLs. 96 covers 80px
+    // Kept narrowed (from Next defaults) so re-enabling the optimizer later
+    // doesn't explode unique `url/w/q` variants per photo. 640 covers mobile
+    // 100vw, 1080 covers 50vw/cards/896px heroes. 96 covers 80px
     // avatars, 256/384 cover gallery thumbnails (20-33vw).
     deviceSizes: [640, 1080, 1920],
     imageSizes: [96, 256, 384],

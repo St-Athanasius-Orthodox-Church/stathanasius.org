@@ -28,6 +28,13 @@ export async function generateMetadata({
   params,
 }: PageProps): Promise<Metadata> {
   const { id } = await params
+
+  // Fast bail for bot enumeration (e.g. `/photo-albums/null`): skip the
+  // Payload client entirely on non-numeric ids.
+  if (!/^\d+$/.test(id)) {
+    return { title: 'Photo Album Not Found' }
+  }
+
   const album = await getPhotoAlbum(id)
 
   if (!album) {
@@ -57,6 +64,11 @@ export async function generateMetadata({
 
 export default async function PhotoAlbumShow({ params }: PageProps) {
   const { id } = await params
+
+  if (!/^\d+$/.test(id)) {
+    notFound()
+  }
+
   const album = await getPhotoAlbum(id)
 
   if (!album) {

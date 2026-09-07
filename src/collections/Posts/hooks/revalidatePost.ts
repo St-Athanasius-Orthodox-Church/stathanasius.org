@@ -6,11 +6,9 @@ import type { Post } from '../../../payload-types'
 
 export const revalidatePost: CollectionAfterChangeHook<Post> = ({
   doc,
-  req: { payload, context },
+  req: { context },
 }) => {
   if (!context.disableRevalidate) {
-    payload.logger.info(`Revalidating blog posts at /blog/${doc.slug}`)
-
     revalidatePath('/')
     revalidatePath('/blog')
 

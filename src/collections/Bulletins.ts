@@ -9,10 +9,8 @@ import { revalidatePath } from 'next/cache'
 import { anyone } from '../access/anyone'
 import { authenticated } from '../access/authenticated'
 
-const revalidateBulletins: CollectionAfterChangeHook = ({ doc, req: { payload, context } }) => {
+const revalidateBulletins: CollectionAfterChangeHook = ({ doc, req: { context } }) => {
   if (!context.disableRevalidate) {
-    payload.logger.info('Revalidating bulletins')
-
     revalidatePath('/')
     revalidatePath('/bulletins')
   }
