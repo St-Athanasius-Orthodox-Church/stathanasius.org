@@ -29,6 +29,9 @@ export default buildConfig({
       // Feel free to delete this at any time. Simply remove the line below.
       beforeLogin: ['@/components/BeforeLogin'],
     },
+    meta: {
+      icons: [{ rel: 'icon', type: 'image/x-icon', url: '/favicon.ico' }],
+    },
     importMap: {
       baseDir: path.resolve(dirname),
     },
