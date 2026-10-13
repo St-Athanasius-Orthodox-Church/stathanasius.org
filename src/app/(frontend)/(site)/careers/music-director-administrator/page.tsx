@@ -8,6 +8,17 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
+const choirRecordings = [
+  {
+    title: 'Rejoice, O Virgin Theotokos',
+    src: '/careers/rejoice-o-virgin-theotokos.mp3',
+  },
+  {
+    title: 'Today Is the Beginning',
+    src: '/careers/today-is-the-beginning.mp3',
+  },
+]
+
 export default function MusicDirectorAdministrator() {
   return (
     <>
@@ -86,6 +97,36 @@ export default function MusicDirectorAdministrator() {
                 </a>
               </li>
             </ul>
+          </div>
+
+          <div className="mb-12">
+            <h2 className="heading-orthodox mb-4 text-2xl font-semibold md:text-3xl">
+              Our Choir
+            </h2>
+            <div
+              className="mb-6 h-0.5 w-12"
+              style={{ background: 'var(--orthodox-gold)' }}
+            />
+            <p className="leading-relaxed">
+              A couple of recordings of our choir to give a sense of our parish
+              music.
+            </p>
+            <div className="not-prose mt-6 space-y-6">
+              {choirRecordings.map((recording) => (
+                <div key={recording.src}>
+                  <p className="mb-2 font-semibold">{recording.title}</p>
+                  <audio
+                    controls
+                    className="h-10 w-full"
+                    preload="none"
+                    aria-label={`Play ${recording.title}`}
+                  >
+                    <source src={recording.src} type="audio/mpeg" />
+                    Your browser does not support the audio element.
+                  </audio>
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="mb-12">
